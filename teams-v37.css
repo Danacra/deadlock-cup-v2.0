@@ -1,0 +1,63 @@
+/* Deadlock Cup v3.7.1 — clear space around headers and compact, reversible captain selection. */
+/* Higher specificity deliberately overrides old .panel and mobile rules. */
+#view-register #teamRegistration.team-apply-panel {
+  padding: clamp(22px, 3.5vw, 40px) !important;
+  box-sizing: border-box;
+}
+#view-register #teamRegistration .panel-heading {
+  padding: 0;
+  margin: 0 0 26px;
+  gap: 16px;
+  align-items: center;
+}
+#view-register #teamRegistration .panel-heading > div:last-child{min-width:0}
+#view-register #teamRegistration .panel-heading h3{line-height:1.3}
+#view-register #teamRegistration .panel-heading p{line-height:1.65;margin-top:9px}
+#view-register #teamRegistration .team-apply-roster-title{margin-top:12px;gap:12px;line-height:1.4}
+#view-register .reg-mode-tabs{margin-bottom:22px;gap:10px}
+#view-admin #teamApplicationsPanel.team-applications {
+  padding: clamp(22px, 3vw, 34px) !important;
+  box-sizing: border-box;
+}
+#view-admin #teamApplicationsPanel .team-applications-heading{gap:16px;margin-bottom:21px}
+#view-admin #teamApplicationsPanel .team-applications-heading > div{min-width:0;flex:1}
+#view-admin #teamApplicationsPanel .section-kicker{line-height:1.5;margin-bottom:10px}
+#view-admin #teamApplicationsPanel h3{margin:8px 0 10px;line-height:1.25}
+#view-admin #teamApplicationsPanel p{margin:0;line-height:1.7}
+#view-admin #teamApplicationsPanel .message{margin-bottom:9px}
+/* Star: inactive is outlined, active is lime and can be clicked to undo. */
+.dc-captain-icon,.t-captain-action.dc-captain-icon,.action-btn.dc-captain-icon{
+  width:34px !important;
+  min-width:34px !important;
+  max-width:34px !important;
+  height:34px !important;
+  min-height:34px !important;
+  padding:0 !important;
+  display:inline-flex !important;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 34px;
+  background:#1b2317;
+  border:1px solid #566b3f;
+  color:#b6ff00;
+  font:700 19px/1 Arial,sans-serif;
+  cursor:pointer;
+  border-radius:3px;
+  transition:background .16s ease,color .16s ease,border-color .16s ease;
+}
+.dc-captain-icon:hover{border-color:#b6ff00;background:#29381c;color:#e4ffa8}
+.dc-captain-icon.is-active,.dc-captain-icon[aria-pressed="true"]{
+  border-color:#b6ff00 !important;
+  background:#b6ff00 !important;
+  color:#101610 !important;
+}
+.dc-captain-icon.is-active:hover{background:#daff70 !important}
+.t-player-pill .dc-captain-icon{margin-left:auto}
+.record-actions .dc-captain-icon{justify-self:end}
+@media(max-width:640px){
+  #view-register #teamRegistration.team-apply-panel{padding:20px !important}
+  #view-admin #teamApplicationsPanel.team-applications{padding:20px !important}
+  #view-admin #teamApplicationsPanel .team-applications-heading{flex-direction:column;align-items:stretch}
+  #view-admin #teamApplicationsPanel .team-applications-heading > button{align-self:flex-start}
+  .record-actions .dc-captain-icon{justify-self:start}
+}

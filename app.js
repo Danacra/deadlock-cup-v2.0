@@ -2,7 +2,7 @@ import { db, configured, initializeDatabase, demo, loadHeroes, FALLBACK_HEROES, 
 import { createTournamentController } from './tournament.js';
 const $ = (id) => document.getElementById(id);
 const state = { view: 'register', heroes: [], selected: [], roster: [], registrations: [], broadcast: null, isAdmin: false, adminStatus: 'all' };
-const tournament = createTournamentController({isAdmin:()=>state.isAdmin,getRegistrations:()=>state.registrations});
+const tournament = createTournamentController({isAdmin:()=>state.isAdmin,getRegistrations:()=>state.registrations,onTeamsChanged:()=>renderAdmin()});
 const message = (id, text, type = 'ok') => { const el = $(id); el.textContent = text; el.className = `message ${type}`; };
 const errorText = (err) => {
   if (err?.code === '23505') return 'Такой никнейм уже зарегистрирован.';
@@ -229,7 +229,7 @@ function renderAdmin() {
        ${r.notes ? `<div class="wide"><span>КОММЕНТАРИЙ / PRIVATE</span>${esc(r.notes)}</div>` : ''}
        <div class="wide"><span>ДАТА РЕГИСТРАЦИИ</span>${esc(new Date(r.submitted_at).toLocaleString('ru-RU'))}</div></div>
        <div class="record-heroes">${heroes}</div></div>
-       <div class="record-actions">${r.status==='approved'?`<button class="action-btn" data-action="captain" data-id="${esc(r.id)}" type="button">★ СДЕЛАТЬ КАПИТАНОМ</button>`:''}${r.steam_profile && r.steam_avatar_opt_in ? `<button class="action-btn dc-steam-sync" data-action="steam-avatar" data-id="${esc(r.id)}" type="button">↻ STEAM ФОТО</button>` : ''}<button class="action-btn" data-action="approved" data-id="${esc(r.id)}">✓ ПРИНЯТЬ</button><button class="action-btn" data-action="rejected" data-id="${esc(r.id)}">× ОТКЛОНИТЬ</button><button class="action-btn danger" data-action="delete" data-id="${esc(r.id)}">УДАЛИТЬ</button></div></article>`;
+       <div class="record-actions">${tournament.captainActionForPlayer(r.id)}${r.steam_profile && r.steam_avatar_opt_in ? `<button class="action-btn dc-steam-sync" data-action="steam-avatar" data-id="${esc(r.id)}" type="button">↻ STEAM ФОТО</button>` : ''}<button class="action-btn" data-action="approved" data-id="${esc(r.id)}">✓ ПРИНЯТЬ</button><button class="action-btn" data-action="rejected" data-id="${esc(r.id)}">× ОТКЛОНИТЬ</button><button class="action-btn danger" data-action="delete" data-id="${esc(r.id)}">УДАЛИТЬ</button></div></article>`;
   }).join('') : '<div class="empty-mini">Анкет нет или ни одна не соответствует фильтру.</div>';
   const eligible = rows.filter(r => r.status !== 'rejected');
   ['leftPlayer', 'rightPlayer'].forEach(id => {
@@ -376,7 +376,7 @@ async function init() {
   $('exportCsv').addEventListener('click', () => exportData('csv'));
   $('adminStatusFilter').addEventListener('change', e => { state.adminStatus = e.target.value; renderAdmin(); });
   $('adminSearch').addEventListener('input', renderAdmin);
-  $('adminRows').addEventListener('click', e => { const action = e.target.closest('[data-action]'); if (!action) return; if(action.dataset.action==='captain') tournament.setCaptainForPlayer(action.dataset.id); else setStatus(action.dataset.id, action.dataset.action); });
+  $('adminRows').addEventListener('click', async e => { const action = e.target.closest('[data-action]'); if (!action) return; if(action.dataset.action==='captain') { const result=await tournament.setCaptainForPlayer(action.dataset.id); if(result)renderAdmin(); } else setStatus(action.dataset.id, action.dataset.action); });
   $('broadcastForm').addEventListener('submit', saveBroadcast);
   document.querySelectorAll('[data-copy-overlay]').forEach(el => el.addEventListener('click', () => copyOverlay(el.dataset.copyOverlay)));
   // Сразу показываем выбор героев, не ожидая внешних API и CDN.

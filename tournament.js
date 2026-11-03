@@ -26,7 +26,7 @@ const errorMessage = error => {
 };
 const matchupKey = m => `${m.round_no}-${m.match_no}`;
 
-export function createTournamentController({isAdmin, getRegistrations}) {
+export function createTournamentController({isAdmin, getRegistrations, onTeamsChanged}) {
   const data = {teams: [], publicMembers: [], members: [], guests: [], requests: [], matches: [], broadcast: null};
   let active = false;
   const flash = (message, type='ok', target='tournamentMessage') => {
@@ -108,7 +108,7 @@ export function createTournamentController({isAdmin, getRegistrations}) {
       <span class="t-drag-handle">${r.guest?'◇':'⠿'}</span>${avatarMarkup(r.steam_avatar_url)}<b><small>${i+1}.</small> ${esc(r.nickname)}</b>
       ${t.captain_nickname?.toLowerCase()===r.nickname.toLowerCase()?'<span class="team-captain-tag">★ КАПИТАН</span>':''}
       ${r.guest?`<span class="t-guest-note">АНКЕТА КОМАНДЫ</span><button class="t-guest-action" data-t-action="guest-info" data-guest-id="${esc(r.id)}">ДАННЫЕ</button><button class="t-guest-action" data-t-action="remove-guest" data-guest-id="${esc(r.id)}">УБРАТЬ</button>`:`<select class="t-assignment-select" data-player-id="${esc(r.id)}" aria-label="Команда игрока ${esc(r.nickname)}">${options(t.id)}</select>`}
-      <button class="t-captain-action" data-t-action="captain" data-team-id="${esc(t.id)}" data-nickname="${esc(r.nickname)}" ${t.captain_nickname?.toLowerCase()===r.nickname.toLowerCase()?'disabled':''}>${t.captain_nickname?.toLowerCase()===r.nickname.toLowerCase()?'КАПИТАН':'★ СДЕЛАТЬ КАПИТАНОМ'}</button></div>`).join('')}
+      ${!t.captain_nickname?.trim() || t.captain_nickname.trim().toLocaleLowerCase()===r.nickname.trim().toLocaleLowerCase() ? `<button type="button" class="t-captain-action dc-captain-icon ${t.captain_nickname?.trim().toLocaleLowerCase()===r.nickname.trim().toLocaleLowerCase()?'is-active':''}" data-t-action="captain" data-team-id="${esc(t.id)}" data-nickname="${esc(r.nickname)}" aria-label="${t.captain_nickname?.trim().toLocaleLowerCase()===r.nickname.trim().toLocaleLowerCase()?'Снять капитана':'Сделать капитаном'}: ${esc(r.nickname)}" title="${t.captain_nickname?.trim().toLocaleLowerCase()===r.nickname.trim().toLocaleLowerCase()?'Снять капитана':'Сделать капитаном'}" aria-pressed="${t.captain_nickname?.trim().toLocaleLowerCase()===r.nickname.trim().toLocaleLowerCase()}">★</button>` : ''}</div>`).join('')}
       ${Array.from({length:Math.max(0,6-players.length)},()=>'<div class="t-slot-empty">+ Перетащите игрока сюда</div>').join('')}</div></section>`;
     }).join('') : '<div class="t-placeholder">Создайте первую команду. Затем распределите принятых игроков из резерва.</div>';
     $('adminBracket').innerHTML = bracketHtml(true);
@@ -162,6 +162,7 @@ export function createTournamentController({isAdmin, getRegistrations}) {
       await loadPublic();
       renderAdminTeams();
       await loadTeamRequests();
+      if (typeof onTeamsChanged==='function') onTeamsChanged();
     } catch(error) { flash(`Не удалось открыть ростер: ${errorMessage(error)}`,'error'); }
   }
   async function action(operation,success,target='tournamentMessage') {
@@ -301,19 +302,54 @@ export function createTournamentController({isAdmin, getRegistrations}) {
       },teamId?`Игрок «${player.nickname}» добавлен в команду «${teamName(teamId)}».`:`Игрок «${player.nickname}» отправлен в резерв.`,'tournamentRosterMessage');
     } finally {pendingMoves.delete(playerId);}
   }
+  // One small star per eligible player. When a captain exists, only their
+  // active star remains visible; clicking it again removes the appointment.
+  function captainActionForPlayer(playerId) {
+    const member=data.members.find(m=>m.registration_id===playerId);
+    const team=member&&data.teams.find(t=>t.id===member.team_id);
+    const player=member&&getRegistrations().find(r=>r.id===playerId);
+    if(!team || !player || player.status!=='approved')return '';
+    const current=String(team.captain_nickname||'').trim().toLocaleLowerCase();
+    const selected=Boolean(current)&&current===player.nickname.trim().toLocaleLowerCase();
+    if(current&&!selected)return '';
+    const label=selected?'Снять капитана':'Сделать капитаном';
+    return `<button type="button" class="action-btn dc-captain-icon ${selected?'is-active':''}" data-action="captain" data-id="${esc(playerId)}" aria-label="${label}: ${esc(player.nickname)}" title="${label}" aria-pressed="${selected}">★</button>`;
+  }
+  const pendingCaptains=new Set();
   async function setCaptain(teamId,nickname) {
-    if(!isAdmin())return;
-    await action(async()=>{
-      if(configured){const {error}=await db.rpc('set_team_captain_v35',{p_team_id:teamId,p_nickname:nickname});if(error)throw error;}
-      else {const d=demoRead();const t=d.teams.find(t=>t.id===teamId);if(!t)throw new Error('Команда не найдена');t.captain_nickname=nickname;demoSave(d);}
-    },`★ ${nickname} теперь капитан команды «${teamName(teamId)}».`,'tournamentRosterMessage');
+    if(!isAdmin()||pendingCaptains.has(teamId))return false;
+    const team=data.teams.find(t=>t.id===teamId);
+    if(!team)return flash('Команда не найдена.','error','tournamentRosterMessage');
+    const current=String(team.captain_nickname||'').trim().toLocaleLowerCase();
+    const selected=current===nickname.trim().toLocaleLowerCase();
+    if(current&&!selected)return flash('В команде уже назначен капитан. Сначала нажми ★ у текущего капитана, чтобы снять его.','error','tournamentRosterMessage');
+    const success=selected?`Капитан команды «${teamName(teamId)}» снят. Можно выбрать другого игрока.`:`★ ${nickname} назначен капитаном команды «${teamName(teamId)}».`;
+    pendingCaptains.add(teamId);
+    try {
+      return await action(async()=>{
+        if(configured){
+          const {error}=await db.rpc('toggle_team_captain_v37',{p_team_id:teamId,p_nickname:nickname});
+          if(error){
+            if(/toggle_team_captain_v37|does not exist|schema cache|could not find the function/i.test(String(error.message||'')))
+              throw new Error('Требуется миграция Supabase: выполни supabase/upgrade-captain-toggle-v3.7.sql в SQL Editor.');
+            throw error;
+          }
+        } else {
+          const d=demoRead(), t=d.teams.find(t=>t.id===teamId);
+          if(!t)throw new Error('Команда не найдена');
+          const value=String(t.captain_nickname||'').trim().toLocaleLowerCase();
+          if(value&&value!==nickname.trim().toLocaleLowerCase())throw new Error('Капитан уже назначен');
+          t.captain_nickname=value?'':nickname;demoSave(d);
+        }
+      },success,'tournamentRosterMessage');
+    } finally {pendingCaptains.delete(teamId);}
   }
   async function setCaptainForPlayer(playerId) {
-    if(!isAdmin())return;
+    if(!isAdmin())return false;
     const member=data.members.find(m=>m.registration_id===playerId);
     const player=getRegistrations().find(r=>r.id===playerId);
-    if(!member || !player)return flash('Сначала добавь игрока в команду, затем назначь капитаном.','error','tournamentRosterMessage');
-    await setCaptain(member.team_id,player.nickname);
+    if(!member || !player){flash('Сначала добавь игрока в команду, затем назначь капитаном.','error','tournamentRosterMessage');return false;}
+    return await setCaptain(member.team_id,player.nickname);
   }
   async function removeGuest(guestId) {
     if(!isAdmin())return;
@@ -572,5 +608,5 @@ export function createTournamentController({isAdmin, getRegistrations}) {
     $('unassignedDropzone').addEventListener('drop',e=>{e.preventDefault();const id=e.dataTransfer.getData('text/plain');if(id)movePlayer(id,'');});
   }
   function init() { active=true;listen(); }
-  return {init,loadPublic,loadAdmin,renderAdminTeams,setCaptainForPlayer};
+  return {init,loadPublic,loadAdmin,renderAdminTeams,setCaptainForPlayer,captainActionForPlayer};
 }
