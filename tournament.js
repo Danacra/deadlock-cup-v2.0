@@ -52,7 +52,20 @@ export function createTournamentController({isAdmin, getRegistrations, onTeamsCh
   const adminsPlayers = id => data.members.filter(m=>m.team_id===id)
     .map(m=>getRegistrations().find(r=>r.id===m.registration_id)).filter(Boolean)
     .sort((a,b)=>a.nickname.localeCompare(b.nickname,'ru'));
-  const adminTeamPlayers = id => [...adminsPlayers(id).map(r=>({...r,guest:false})), ...data.guests.filter(g=>g.team_id===id).map(g=>({...g,guest:true}))].sort((a,b)=>a.nickname.localeCompare(b.nickname,'ru'));
+  // Display the selected captain first in admin rosters (including team-application players).
+  // The public roster already applies the same captain-first ordering.
+  const adminTeamPlayers = id => {
+    const captain = String(data.teams.find(t=>t.id===id)?.captain_nickname || '').trim().toLocaleLowerCase();
+    const players = [
+      ...adminsPlayers(id).map(r=>({...r,guest:false})),
+      ...data.guests.filter(g=>g.team_id===id).map(g=>({...g,guest:true}))
+    ];
+    return players.sort((a,b)=>{
+      const aCaptain = Boolean(captain) && String(a.nickname||'').trim().toLocaleLowerCase()===captain;
+      const bCaptain = Boolean(captain) && String(b.nickname||'').trim().toLocaleLowerCase()===captain;
+      return Number(bCaptain)-Number(aCaptain) || String(a.nickname||'').localeCompare(String(b.nickname||''),'ru',{sensitivity:'base'});
+    });
+  };
   const eligible = () => getRegistrations().filter(r=>r.status==='approved')
     .sort((a,b)=>a.nickname.localeCompare(b.nickname,'ru'));
 
@@ -105,10 +118,12 @@ export function createTournamentController({isAdmin, getRegistrations, onTeamsCh
       <div class="t-admin-team-actions"><button type="button" data-t-action="edit-team" data-team-id="${esc(t.id)}" title="Цвет и эмблема">◈</button><button type="button" data-t-action="rename-team" data-team-id="${esc(t.id)}" title="Переименовать">✎</button>
       <button type="button" data-t-action="delete-team" data-team-id="${esc(t.id)}" title="Удалить">×</button></div></div>
       <div class="t-team-dropzone" data-drop-team="${esc(t.id)}">${players.map((r,i)=>`<div class="t-player-pill ${r.guest?'t-guest-row':''}" ${r.guest?'':`draggable="true" data-player-id="${esc(r.id)}"`}>
-      <span class="t-drag-handle">${r.guest?'◇':'⠿'}</span>${avatarMarkup(r.steam_avatar_url)}<b><small>${i+1}.</small> ${esc(r.nickname)}</b>
-      ${t.captain_nickname?.toLowerCase()===r.nickname.toLowerCase()?'<span class="team-captain-tag">★ КАПИТАН</span>':''}
-      ${r.guest?`<span class="t-guest-note">АНКЕТА КОМАНДЫ</span><button class="t-guest-action" data-t-action="guest-info" data-guest-id="${esc(r.id)}">ДАННЫЕ</button><button class="t-guest-action" data-t-action="remove-guest" data-guest-id="${esc(r.id)}">УБРАТЬ</button>`:`<select class="t-assignment-select" data-player-id="${esc(r.id)}" aria-label="Команда игрока ${esc(r.nickname)}">${options(t.id)}</select>`}
-      ${!t.captain_nickname?.trim() || t.captain_nickname.trim().toLocaleLowerCase()===r.nickname.trim().toLocaleLowerCase() ? `<button type="button" class="t-captain-action dc-captain-icon ${t.captain_nickname?.trim().toLocaleLowerCase()===r.nickname.trim().toLocaleLowerCase()?'is-active':''}" data-t-action="captain" data-team-id="${esc(t.id)}" data-nickname="${esc(r.nickname)}" aria-label="${t.captain_nickname?.trim().toLocaleLowerCase()===r.nickname.trim().toLocaleLowerCase()?'Снять капитана':'Сделать капитаном'}: ${esc(r.nickname)}" title="${t.captain_nickname?.trim().toLocaleLowerCase()===r.nickname.trim().toLocaleLowerCase()?'Снять капитана':'Сделать капитаном'}" aria-pressed="${t.captain_nickname?.trim().toLocaleLowerCase()===r.nickname.trim().toLocaleLowerCase()}">★</button>` : ''}</div>`).join('')}
+      <div class="t-roster-primary"><span class="t-drag-handle">${r.guest?'◇':'⠿'}</span>${avatarMarkup(r.steam_avatar_url)}<b class="t-roster-name"><small>${i+1}.</small> ${esc(r.nickname)}</b></div>
+      <div class="t-roster-actions">
+      ${t.captain_nickname?.trim().toLocaleLowerCase()===r.nickname.trim().toLocaleLowerCase()?'<span class="team-captain-tag">★ КАПИТАН</span>':''}
+      ${r.guest?`<button type="button" class="t-guest-action" data-t-action="remove-guest" data-guest-id="${esc(r.id)}" title="Убрать игрока из команды">УБРАТЬ</button>`:`<select class="t-assignment-select" data-player-id="${esc(r.id)}" aria-label="Команда игрока ${esc(r.nickname)}">${options(t.id)}</select>`}
+      ${!t.captain_nickname?.trim() || t.captain_nickname.trim().toLocaleLowerCase()===r.nickname.trim().toLocaleLowerCase() ? `<button type="button" class="t-captain-action dc-captain-icon ${t.captain_nickname?.trim().toLocaleLowerCase()===r.nickname.trim().toLocaleLowerCase()?'is-active':''}" data-t-action="captain" data-team-id="${esc(t.id)}" data-nickname="${esc(r.nickname)}" aria-label="${t.captain_nickname?.trim().toLocaleLowerCase()===r.nickname.trim().toLocaleLowerCase()?'Снять капитана':'Сделать капитаном'}: ${esc(r.nickname)}" title="${t.captain_nickname?.trim().toLocaleLowerCase()===r.nickname.trim().toLocaleLowerCase()?'Снять капитана':'Сделать капитаном'}" aria-pressed="${t.captain_nickname?.trim().toLocaleLowerCase()===r.nickname.trim().toLocaleLowerCase()}">★</button>` : ''}
+      </div></div>`).join('')}
       ${Array.from({length:Math.max(0,6-players.length)},()=>'<div class="t-slot-empty">+ Перетащите игрока сюда</div>').join('')}</div></section>`;
     }).join('') : '<div class="t-placeholder">Создайте первую команду. Затем распределите принятых игроков из резерва.</div>';
     $('adminBracket').innerHTML = bracketHtml(true);

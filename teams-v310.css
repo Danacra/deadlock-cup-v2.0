@@ -1,0 +1,63 @@
+/* Deadlock Cup v3.10 — compact roster rows, captain first, no redundant team-profile controls. */
+/* Keep player names readable even in narrow team cards. */
+#view-admin .t-team-dropzone .t-player-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  flex-wrap: nowrap;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px 12px;
+}
+#view-admin .t-team-dropzone .t-roster-primary {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  min-width: 0;
+  width: 100%;
+}
+#view-admin .t-team-dropzone .t-roster-primary .t-drag-handle {
+  flex: 0 0 16px;
+  font-size: 16px;
+}
+#view-admin .t-team-dropzone .t-roster-primary .dc-team-avatar {
+  flex: 0 0 auto;
+}
+#view-admin .t-team-dropzone .t-roster-name {
+  display: block;
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+  overflow-wrap: break-word;
+  word-break: normal;
+  white-space: normal;
+  line-height: 1.4;
+}
+#view-admin .t-team-dropzone .t-roster-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  min-width: 0;
+  width: 100%;
+}
+#view-admin .t-team-dropzone .t-roster-actions .team-captain-tag {
+  margin-left: 0;
+  margin-right: auto;
+}
+#view-admin .t-team-dropzone .t-roster-actions .dc-captain-icon {
+  margin-left: 0;
+}
+#view-admin .t-team-dropzone .t-roster-actions .t-assignment-select {
+  flex: 0 1 auto;
+  min-width: 100px;
+  max-width: min(190px, 100%);
+}
+#view-admin .t-team-dropzone .t-roster-actions .t-guest-action {
+  flex: 0 0 auto;
+}
+@media(max-width:420px) {
+  #view-admin .t-team-dropzone .t-player-pill{padding:9px 10px}
+  #view-admin .t-team-dropzone .t-roster-primary{gap:7px}
+}
