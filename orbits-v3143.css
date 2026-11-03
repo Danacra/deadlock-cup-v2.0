@@ -1,0 +1,156 @@
+/* Deadlock Cup v3.14.3 — real independent annular gradients.
+   Base version: v3.14.2. Load after theme-v314.css and typography-v3142.css.
+   The old whole-circle wash is disabled; colors live in non-overlapping rings. */
+
+/* Keep the page dark; remove only the former ambient green fog. */
+.hero-banner {
+  background:
+    radial-gradient(ellipse at 74% 44%, rgba(26,43,17,.075), transparent 57%),
+    linear-gradient(115deg, #101410, #090b09 65%, #080a08);
+}
+.dc-orbit-wash, .dc-section-halo {
+  background: none !important;
+  animation: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+}
+.dc-orbit-wash::after { display: none !important; }
+.dc-orbit-system { filter: none; }
+
+/* Exact diameters of the existing hero-ring outlines: 53%, 70%, 89%, 107%.
+   The radial mask makes a true donut for each zone; none can tint its neighbors. */
+.dc-orbit-band {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--orbit-size);
+  height: auto;
+  aspect-ratio: 1;
+  display: block;
+  border-radius: 50%;
+  transform: translate(-50%,-50%);
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(circle closest-side at center,
+    var(--tone-start) 0%,
+    var(--tone-middle) 87%,
+    var(--tone-edge) 100%);
+  -webkit-mask-image: radial-gradient(circle closest-side at center,
+    transparent 0 var(--cutout),
+    #000 calc(var(--cutout) + 1.4%) 97.6%,
+    transparent 100%);
+  mask-image: radial-gradient(circle closest-side at center,
+    transparent 0 var(--cutout),
+    #000 calc(var(--cutout) + 1.4%) 97.6%,
+    transparent 100%);
+}
+/* The core is a disk, not an annulus. */
+.dc-orbit-band.band-core {
+  --orbit-size: 53%;
+  --tone-start: rgba(13,24,15,.20);
+  --tone-middle: rgba(27,72,35,.44);
+  --tone-edge: rgba(30,74,32,.27);
+  -webkit-mask-image: radial-gradient(circle closest-side at center, #000 0 97.6%, transparent 100%);
+  mask-image: radial-gradient(circle closest-side at center, #000 0 97.6%, transparent 100%);
+}
+/* Between first and second line (53/70 = 75.7% of second radius). */
+.dc-orbit-band.band-olive {
+  --orbit-size: 70%;
+  --cutout: 75.7%;
+  --tone-start: rgba(25,39,12,.10);
+  --tone-middle: rgba(106,145,42,.48);
+  --tone-edge: rgba(65,95,22,.22);
+}
+/* Between second and third line (70/89 = 78.7%). */
+.dc-orbit-band.band-emerald {
+  --orbit-size: 89%;
+  --cutout: 78.7%;
+  --tone-start: rgba(7,32,24,.12);
+  --tone-middle: rgba(28,111,78,.46);
+  --tone-edge: rgba(22,78,57,.22);
+}
+/* Between third and fourth line (89/107 = 83.2%). */
+.dc-orbit-band.band-brass {
+  --orbit-size: 107%;
+  --cutout: 83.2%;
+  --tone-start: rgba(35,25,9,.11);
+  --tone-middle: rgba(147,112,49,.40);
+  --tone-edge: rgba(81,66,28,.19);
+}
+/* A quiet moving highlight belongs to each band, never to the full disc. */
+.dc-orbit-band::after, .dc-mini-band::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(from 65deg,
+      transparent 0 58deg,
+      rgba(242,244,175,.08) 97deg,
+      transparent 140deg 230deg,
+      rgba(162,246,96,.055) 290deg,
+      transparent 330deg 360deg);
+  animation: dc-v3143-band-highlight 82s linear infinite;
+}
+.dc-orbit-band.band-olive::after { animation-duration: 72s; animation-direction: reverse; }
+.dc-orbit-band.band-emerald::after { animation-duration: 96s; }
+.dc-orbit-band.band-brass::after { animation-duration: 108s; animation-direction: reverse; }
+.hero-right .hero-ring { z-index: 2; }
+.dc-orbit-logo { z-index: 4; }
+.dc-orbit-compass { z-index: 3; }
+
+/* Every section header has its own three distinct annular gradients as well.
+   The dimensions match .dc-mini-ring (57%, 83%, 108%) exactly. */
+.dc-mini-band {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--mini-size);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%,-50%);
+  display: block;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(circle closest-side at center,
+    var(--mini-start) 0%, var(--mini-middle) 87%, var(--mini-edge) 100%);
+  -webkit-mask-image: radial-gradient(circle closest-side at center,
+    transparent 0 var(--mini-cutout), #000 calc(var(--mini-cutout) + 1.4%) 97%, transparent 100%);
+  mask-image: radial-gradient(circle closest-side at center,
+    transparent 0 var(--mini-cutout), #000 calc(var(--mini-cutout) + 1.4%) 97%, transparent 100%);
+}
+.dc-mini-band.mini-core {
+  --mini-size: 57%;
+  --mini-start: rgba(13,25,15,.16);
+  --mini-middle: rgba(34,76,36,.38);
+  --mini-edge: rgba(32,70,29,.23);
+  -webkit-mask-image: radial-gradient(circle closest-side at center, #000 0 97%, transparent 100%);
+  mask-image: radial-gradient(circle closest-side at center, #000 0 97%, transparent 100%);
+}
+.dc-mini-band.mini-olive {
+  --mini-size: 83%;
+  --mini-cutout: 68.7%;
+  --mini-start: rgba(26,38,13,.10);
+  --mini-middle: rgba(111,147,47,.39);
+  --mini-edge: rgba(64,94,24,.16);
+}
+.dc-mini-band.mini-emerald {
+  --mini-size: 108%;
+  --mini-cutout: 76.9%;
+  --mini-start: rgba(8,35,26,.11);
+  --mini-middle: rgba(32,107,79,.39);
+  --mini-edge: rgba(26,78,60,.16);
+}
+.dc-section-art .dc-mini-ring { z-index: 1; }
+.dc-section-art > img { z-index: 2; }
+
+@keyframes dc-v3143-band-highlight {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+/* The existing site reduces the fourth ring to 98% on tablets/phones. */
+@media (max-width: 990px) {
+  .dc-orbit-band.band-brass { --orbit-size: 98%; --cutout: 90.8%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dc-orbit-band::after, .dc-mini-band::after { animation: none !important; }
+}
