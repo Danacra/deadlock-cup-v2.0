@@ -1,4 +1,4 @@
-/* Deadlock Cup v3.9 — scattered discoverable lore; visual only, no effect on registration. */
+/* Deadlock Cup v3.11 — visible scattered lore; visual only, no effect on registration. */
 #pageIntro .hero-right,
 #view-register .info-quote,
 .dc-view-hero { position:relative; }
@@ -16,12 +16,12 @@
   padding:4px;
   cursor:pointer;
   appearance:none;
-  border:1px solid transparent;
+  border:1px solid #b6ff004a;
   border-radius:50%;
-  background:transparent;
+  background:radial-gradient(circle,#b6ff0017,transparent 73%);
   color:inherit;
-  opacity:.30;
-  filter:saturate(.68) drop-shadow(0 0 2px #000);
+  opacity:.82;
+  filter:saturate(.9) drop-shadow(0 0 5px #b6ff002e);
   transform:translate(-50%, -50%) rotate(var(--dc-egg-tilt,0deg));
   transition:opacity .22s ease,filter .22s ease,transform .22s ease,border-color .22s ease,background .22s ease;
   pointer-events:auto; /* parent decorative layers may disable pointer events */
@@ -29,7 +29,7 @@
 }
 .dc-egg-marker::before{
   content:'';position:absolute;inset:-5px;border:1px dashed #b6ff0044;border-radius:50%;
-  opacity:0;transform:rotate(14deg);transition:opacity .2s ease;pointer-events:none;
+  opacity:.55;transform:rotate(14deg);transition:opacity .2s ease;pointer-events:none;
 }
 .dc-egg-marker img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none;user-select:none;-webkit-user-drag:none;}
 .dc-egg-marker.dc-egg-wide{width:96px;height:41px;border-radius:4px;}
@@ -40,6 +40,13 @@
   transform:translate(-50%, -50%) rotate(0deg) scale(1.08);
 }
 .dc-egg-marker:hover::before,.dc-egg-marker:focus-visible::before{opacity:1}
+.dc-egg-marker.dc-egg-quote, .dc-egg-marker.dc-egg-banner {transform:rotate(var(--dc-egg-tilt,0deg));}
+.dc-egg-marker.dc-egg-quote:hover, .dc-egg-marker.dc-egg-quote:focus-visible,
+.dc-egg-marker.dc-egg-banner:hover, .dc-egg-marker.dc-egg-banner:focus-visible {transform:rotate(0deg) scale(1.08);}
+.dc-egg-fallback {color:#b6ff00;font:700 32px/1 Arial,sans-serif;text-shadow:0 0 10px #b6ff0080;}
+.dc-egg-fallback[hidden],.dc-egg-marker img[hidden]{display:none!important;}
+#view-register .info-quote > .dc-egg-marker {z-index:7;}
+
 .dc-egg-marker:focus-visible{outline:2px solid #B6FF00;outline-offset:7px}
 #pageIntro .hero-right .dc-egg-marker{z-index:9}
 @media(max-width:830px){

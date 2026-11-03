@@ -1,4 +1,4 @@
-/* Deadlock Cup v3.9 — self-contained lore Easter eggs; no data or Supabase dependency. */
+/* Deadlock Cup v3.11 — reliably discoverable lore Easter eggs; no data or Supabase dependency. */
 (() => {
   'use strict';
   const ASSET_ROOT = './easter-eggs/';
@@ -145,33 +145,38 @@
     btn.dataset.eggId=item.id;
     btn.style.setProperty('--dc-egg-tilt',`${rand(-12,12).toFixed(1)}deg`);
     if(slot.kind==='intro'){
-      btn.style.left=rand(38,82).toFixed(1)+'%';
-      btn.style.top=rand(24,71).toFixed(1)+'%';
+      btn.style.left=rand(40,78).toFixed(1)+'%';
+      btn.style.top=rand(26,66).toFixed(1)+'%';
     } else if(slot.kind==='quote'){
-      // Upper-right corner is away from the quote and the bottom caption.
-      btn.style.left=rand(79,88).toFixed(1)+'%';
-      btn.style.top=rand(11,23).toFixed(1)+'%';
+      // Always in the right upper corner, away from the quote and its signature.
+      // Pixel-based positioning keeps the glyph inside narrow quote cards.
+      btn.classList.add('dc-egg-quote');
+      btn.style.right=rand(12,23).toFixed(0)+'px';
+      btn.style.top=rand(12,25).toFixed(0)+'px';
     } else {
-      // The text occupies the left side; the right side is decorative.
-      btn.style.left=rand(86,94).toFixed(1)+'%';
-      btn.style.top=rand(36,68).toFixed(1)+'%';
+      // The text occupies the left side of banners: keep symbols to the right.
+      btn.classList.add('dc-egg-banner');
+      btn.style.right=rand(21,57).toFixed(0)+'px';
+      btn.style.top=rand(32,63).toFixed(1)+'%';
     }
     if(item.id==='drifter') btn.classList.add('dc-egg-wide');
     const icon=image(item.trigger,'','Скрытый знак');icon.alt='';icon.setAttribute('aria-hidden','true');
-    btn.append(icon);btn.addEventListener('click',()=>open(item));
+    // A clearly visible glyph remains if PNG assets were uploaded to the wrong GitHub folder.
+    const fallback=document.createElement('span');fallback.className='dc-egg-fallback';fallback.textContent='✧';fallback.hidden=true;
+    icon.addEventListener('error',()=>{icon.hidden=true;fallback.hidden=false;},{once:true});
+    btn.append(icon,fallback);btn.addEventListener('click',()=>open(item));
     host.append(btn);
   }
 
   function init() {
     const available=slots.filter(s=>document.querySelector(s.selector));
     if(!available.length) return;
-    // Three recurring signs, and two rare appearances. The locations are shuffled on reload.
-    const items=[archive[0],archive[1],archive[2]];
-    if(Math.random()<.52) items.push(archive[3]);
-    if(Math.random()<.38) items.push(archive[4]);
-    // Keep a sign on the landing art, distribute the rest among different sections.
-    const anchors=[available[0],...shuffle(available.slice(1)).slice(0,Math.max(0,items.length-1))];
-    shuffle(items).forEach((item,i)=>place(item,anchors[i]));
+    // Every section has one marker, including the quote on the registration page.
+    // All five unique secrets remain discoverable in any session.
+    // Six slots means one random secret can appear in two different sections.
+    const ordered=shuffle(archive);
+    const assignments=shuffle([...ordered,ordered[Math.floor(Math.random()*ordered.length)]]);
+    available.forEach((slot,i)=>place(assignments[i % assignments.length],slot));
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true});
   else init();
