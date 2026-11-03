@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#14232a">
+  <meta name="theme-color" content="#0A0A0A">
   <meta name="description" content="Deadlock Cup — регистрация участников турнира и информационный центр.">
   <title>DEADLOCK CUP · The Cursed City</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,6 +11,8 @@
   <link rel="stylesheet" href="./styles.css">
   <link rel="stylesheet" href="./stable-v3.css">
   <link rel="stylesheet" href="./v32.css">
+  <link rel="stylesheet" href="./teams-v35.css">
+  <link rel="stylesheet" href="./teams-v36.css">
 </head>
 <body>
   <div class="noise" aria-hidden="true"></div>
@@ -45,7 +47,11 @@
       <section id="view-register" class="view">
         <div class="section-kicker">01 / УЧАСТИЕ</div>
         <div class="section-heading"><div><h2>РЕГИСТРАЦИЯ<span class="dot">.</span></h2><p>Заполни форму. Публично отображается никнейм и назначенная организатором команда.</p></div><span class="section-numeral">01—03</span></div>
-        <div class="registration-layout">
+        <div class="reg-mode-tabs" role="group" aria-label="Тип регистрации">
+          <button type="button" class="reg-mode-btn active" data-reg-mode="solo" aria-pressed="true">01 / ОДИН ИГРОК</button>
+          <button type="button" class="reg-mode-btn" data-reg-mode="team" aria-pressed="false">02 / ЗАРЕГИСТРИРОВАТЬ КОМАНДУ</button>
+        </div>
+        <div id="soloRegistration" class="registration-layout">
           <form id="registerForm" class="panel form-panel">
             <div class="panel-heading"><div class="step">01</div><div><h3>ДАННЫЕ ИГРОКА</h3><p>Контакты увидит только организатор</p></div></div>
             <div class="field-grid">
@@ -72,6 +78,25 @@
             <div class="info-quote"><span>«</span><p>ОДИН ТУРНИР.<br>МНОЖЕСТВО СОПЕРНИКОВ.<br><em>ОДИН ПОБЕДИТЕЛЬ.</em></p><div>DEADLOCK CUP / 2026</div></div>
           </aside>
         </div>
+        <section id="teamRegistration" hidden class="panel team-apply-panel">
+          <div class="panel-heading"><div class="step">06</div><div><h3>ЗАРЕГИСТРИРОВАТЬ КОМАНДУ</h3><p>Капитан заполняет полные данные каждого участника. Заявка отправится на проверку организатору.</p></div></div>
+          <form id="teamRequestForm" class="team-apply-form">
+            <div class="field-grid">
+              <label class="field"><span>Название команды <b>*</b></span><input name="team_name" id="requestTeamName" required minlength="2" maxlength="36" placeholder="Например, HEALING RITE" autocomplete="off"></label>
+              <label class="field"><span>Основной регион команды</span><select id="requestRegion"><option value="EU">Европа</option><option value="NA">Северная Америка</option><option value="ASIA">Азия</option><option value="OTHER">Другой</option></select></label>
+            </div>
+            <div class="team-apply-roster-title"><strong>АНКЕТЫ ИГРОКОВ</strong><span>ОТ 2 ДО 6 ИГРОКОВ · ПЕРВЫЙ — КАПИТАН</span></div>
+            <p class="team-profile-help">Заполни карточку капитана и минимум одного товарища. Для каждого участника укажи Discord и от одного до трёх героев. Остальные карточки можно оставить пустыми.</p>
+            <div id="teamMemberForms" class="team-profile-list"></div>
+            <div class="field-grid">
+              <label class="field full"><span>Комментарий по команде <small>необязательно</small></span><textarea id="requestNote" rows="3" maxlength="800" placeholder="Дополнительные сведения для организатора"></textarea></label>
+            </div>
+            <label class="team-request-consent"><input id="requestConsent" type="checkbox" required><span>Подтверждаю, что <strong>получил разрешение каждого игрока</strong> указать его Discord, Steam и игровые данные для организатора, а также опубликовать его игровой ник в составе после одобрения команды.</span></label>
+            <div class="privacy-note"><span class="shield">◆</span><span><strong>Контакты остаются приватными:</strong> Discord, Steam, часы, выбранные герои и комментарии доступны только администраторам. Аватар Steam не публикуется по заявке капитана — только после отдельного согласия самого игрока. Если у участника уже есть принятая индивидуальная анкета, её данные не перезаписываются.</span></div>
+            <button type="submit" class="btn btn-primary btn-wide" id="requestTeamSubmit">ОТПРАВИТЬ КОМАНДУ НА ПРОВЕРКУ ↗</button>
+            <div class="message" id="requestTeamMessage" role="status" aria-live="polite"></div>
+          </form>
+        </section>
       </section>
 
       <section id="view-roster" class="view dc-decorated-view" hidden>
@@ -113,12 +138,18 @@
         <div id="adminDashboard" hidden>
           <div class="admin-toolbar"><div><span class="text-muted">CONTROL CENTER / PRIVATE</span><h3>УПРАВЛЕНИЕ СИСТЕМОЙ</h3></div><div class="toolbar-actions"><button class="btn btn-outline" id="exportJson">Экспорт JSON ↓</button><button class="btn btn-outline" id="exportCsv">Экспорт CSV ↓</button><button class="btn btn-outline" id="logout">Выйти ↗</button></div></div>
           <div class="admin-metrics"><div class="metric"><span>ВСЕ ЗАЯВКИ</span><strong id="metricAll">0</strong></div><div class="metric"><span>ОЖИДАЮТ</span><strong id="metricPending">0</strong></div><div class="metric"><span>ПРИНЯТЫ</span><strong id="metricApproved">0</strong></div><div class="metric"><span>ОТКЛОНЕНЫ</span><strong id="metricRejected">0</strong></div></div>
+          <section class="team-applications panel" id="teamApplicationsPanel">
+            <div class="team-applications-heading"><div><span class="section-kicker">TEAM APPLICATIONS / PRIVATE</span><h3>ЗАЯВКИ КОМАНД</h3><p>Проверяй состав и контакт капитана до публикации. После принятия команда появится на сайте.</p></div><button type="button" class="btn btn-outline" id="refreshTeamApplications">ОБНОВИТЬ ↻</button></div>
+            <div class="message" id="teamApplicationMessage" role="status" aria-live="polite"></div>
+            <div id="teamApplicationsList"><div class="empty-mini">Загрузка заявок...</div></div>
+          </section>
           <section id="tournamentAdmin" class="t-admin-section">
             <div class="section-kicker section-gap">ROSTER / TEAMS</div>
             <div class="section-heading compact"><div><h2>СОСТАВЫ КОМАНД<span class="dot">.</span></h2><p>Создавай команды, переносись между ростерами перетаскиванием или через меню. Только принятые игроки.</p></div></div>
             <div class="t-admin-topbar panel"><form id="createTeamForm" class="t-team-create"><label class="field"><span>Название новой команды</span><input id="newTeamName" placeholder="Например: HEALING RITE" minlength="2" maxlength="36" required></label><button class="btn btn-primary" type="submit">+ КОМАНДА</button></form><div class="t-team-summary"><strong id="adminTeamCount">0</strong><span>КОМАНД</span><small id="tournamentPlayerStats">0 В СОСТАВАХ / 0 В РЕЗЕРВЕ</small></div></div>
             <div id="unassignedDropzone" class="panel t-reserve"><div class="t-reserve-heading"><div><strong>РЕЗЕРВ ИГРОКОВ</strong><small>Здесь все принятые игроки без команды. Перенеси карточку в нужный ростер.</small></div><span>↓ DROP HERE</span></div><div id="unassignedPlayers" class="t-player-pool"></div></div>
             <div id="tournamentRosterMessage" class="message t-roster-message" role="status" aria-live="polite"></div>
+            <div id="guestInfoPanel" class="team-guest-info panel" hidden><div class="team-guest-info-head"><strong>АНКЕТА ИГРОКА ИЗ КОМАНДНОЙ ЗАЯВКИ</strong><button type="button" id="closeGuestInfo" class="btn btn-outline">ЗАКРЫТЬ ×</button></div><div id="guestInfoContent"></div></div>
             <div id="dcTeamEditor" class="panel dc-team-editor" hidden>
               <div class="dc-team-editor-title"><strong>ОФОРМЛЕНИЕ КОМАНДЫ — <span id="dcEditingName"></span></strong><button type="button" id="dcCloseEditor" class="action-btn">× ЗАКРЫТЬ</button></div>
               <form id="dcTeamEditorForm" class="dc-team-editor-form">

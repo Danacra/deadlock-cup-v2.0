@@ -1,0 +1,33 @@
+/* Deadlock Cup v3.6: full teammate profiles, original black/lime design. */
+.team-profile-help{font-size:12px;line-height:1.65;color:#9cac99;margin:-6px 0 2px}
+.team-profile-list{display:grid;gap:18px}
+.team-profile-card{background:#101410;border:1px solid #33402d;padding:20px 22px;min-width:0}
+.team-profile-card:first-child{border-color:#87c62b;background:#131c10}
+.team-profile-card-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:1px solid #3e4d37;padding-bottom:12px;margin-bottom:16px}
+.team-profile-card-heading strong{font:700 20px Rajdhani,Arial,sans-serif;letter-spacing:.6px;color:#b6ff00}
+.team-profile-card-heading span{font-size:10px;font-weight:800;letter-spacing:1px;color:#abb99f}
+.team-profile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.team-profile-grid .field{min-width:0}
+.team-profile-grid .field.full{grid-column:1/-1}
+.team-profile-heroes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:9px}
+.team-profile-heroes select{width:100%;min-width:0;background:#090e09;color:#ecf1e8;border:1px solid #47553e;padding:12px 9px;font:600 12px Manrope,Arial,sans-serif}
+.team-profile-heroes select:focus-visible{outline:2px solid #b6ff00}
+.team-application-profiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:9px}
+.team-application-profile{border:1px solid #3f5336;background:#0e160e;min-width:0}
+.team-application-profile summary{display:flex;cursor:pointer;gap:10px;align-items:center;padding:11px 13px;flex-wrap:wrap;color:#eef8e8}
+.team-application-profile summary b{color:#b6ff00;font:700 11px Rajdhani,Arial,sans-serif}
+.team-application-profile summary span{font-weight:800}
+.team-application-profile summary small{font-size:10px;color:#94a68c;margin-left:auto}
+.team-profile-private-details{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:13px;margin:0;background:#172018;border-top:1px solid #3f5336}
+.team-profile-private-details div{min-width:0;overflow-wrap:anywhere}
+.team-profile-private-details .wide{grid-column:1/-1}
+.team-profile-private-details dt{font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:#96ac8b;margin-bottom:4px}
+.team-profile-private-details dd{margin:0;font-size:12px;line-height:1.5;color:#f0f4e7;overflow-wrap:anywhere}
+.team-profile-private-details a{color:#b6ff00;text-decoration:underline}
+.team-profile-old{color:#93a888;font-size:11px;line-height:1.5;margin:0}
+.team-guest-info{padding:18px 22px;border:1px solid #89bd3d;margin:8px 0 16px;background:#101710}
+.team-guest-info[hidden]{display:none}
+.team-guest-info-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.team-guest-info-head strong{color:#b6ff00;font:700 15px Rajdhani,Arial,sans-serif}
+.team-guest-info h4{color:#eaf4dc;font-size:19px;margin:8px 0}
+@media(max-width:720px){.team-profile-grid{grid-template-columns:1fr}.team-profile-heroes{grid-template-columns:1fr}.team-profile-card{padding:16px}.team-application-profiles{grid-template-columns:1fr}}

@@ -67,22 +67,38 @@ function renderHeroes({resetScroll = false} = {}) {
   grid.scrollTop = savedScroll;
 }
 function getRosterForDemo() {
-  return demo.getRegistrations().filter(r => r.status !== 'rejected').map(r => ({nickname: r.nickname}));
+  const solo=demo.getRegistrations().filter(r=>r.status!=='rejected').map(r=>({nickname:r.nickname,avatar_url:''}));
+  let guests=[];
+  try{guests=(JSON.parse(localStorage.getItem('deadlock_tournament_demo_v1'))?.guestMembers||[]).map(g=>({nickname:g.nickname,avatar_url:''}));}catch{}
+  return [...solo,...guests];
 }
 async function fetchRoster() {
-  if (configured) {
-    let {data, error} = await db.rpc('get_public_avatar_roster');
-    if (error) {
+  let rows=[];
+  if(configured){
+    let {data,error}=await db.rpc('get_public_avatar_roster');
+    if(error){
       // Older tournament databases have the original public_roster table.
-      const basic = await db.from('public_roster').select('nickname').order('nickname');
-      if (basic.error) throw basic.error;
-      data = basic.data;
+      const basic=await db.from('public_roster').select('nickname').order('nickname');
+      if(basic.error)throw basic.error;
+      data=basic.data;
     }
-    state.roster = data || [];
-  } else state.roster = getRosterForDemo();
-  $('navCount').textContent = state.roster.length;
-  $('sideCount').textContent = String(state.roster.length).padStart(2, '0');
-  $('rosterCount').textContent = state.roster.length;
+    rows=data||[];
+    // Players entered by a captain appear in the public player list AFTER team approval.
+    // Only nickname and explicitly consented avatar URL are returned by the public RPC.
+    const extra=await db.rpc('get_public_team_roster_v35');
+    if(!extra.error)rows=[...rows,...(extra.data||[]).map(r=>({nickname:r.nickname,avatar_url:r.avatar_url||''}))];
+  }else rows=getRosterForDemo();
+  const unique=new Map();
+  for(const row of rows){
+    const nick=String(row.nickname||'').trim(), key=nick.toLocaleLowerCase();
+    if(!nick)continue;
+    const existing=unique.get(key);
+    if(!existing||(!existing.avatar_url&&row.avatar_url))unique.set(key,{nickname:nick,avatar_url:row.avatar_url||''});
+  }
+  state.roster=[...unique.values()].sort((a,b)=>a.nickname.localeCompare(b.nickname,'ru'));
+  $('navCount').textContent=state.roster.length;
+  $('sideCount').textContent=String(state.roster.length).padStart(2,'0');
+  $('rosterCount').textContent=state.roster.length;
   renderRoster();
 }
 function steamAvatarMarkup(url) {
@@ -213,7 +229,7 @@ function renderAdmin() {
        ${r.notes ? `<div class="wide"><span>КОММЕНТАРИЙ / PRIVATE</span>${esc(r.notes)}</div>` : ''}
        <div class="wide"><span>ДАТА РЕГИСТРАЦИИ</span>${esc(new Date(r.submitted_at).toLocaleString('ru-RU'))}</div></div>
        <div class="record-heroes">${heroes}</div></div>
-       <div class="record-actions">${r.steam_profile && r.steam_avatar_opt_in ? `<button class="action-btn dc-steam-sync" data-action="steam-avatar" data-id="${esc(r.id)}" type="button">↻ STEAM ФОТО</button>` : ''}<button class="action-btn" data-action="approved" data-id="${esc(r.id)}">✓ ПРИНЯТЬ</button><button class="action-btn" data-action="rejected" data-id="${esc(r.id)}">× ОТКЛОНИТЬ</button><button class="action-btn danger" data-action="delete" data-id="${esc(r.id)}">УДАЛИТЬ</button></div></article>`;
+       <div class="record-actions">${r.status==='approved'?`<button class="action-btn" data-action="captain" data-id="${esc(r.id)}" type="button">★ СДЕЛАТЬ КАПИТАНОМ</button>`:''}${r.steam_profile && r.steam_avatar_opt_in ? `<button class="action-btn dc-steam-sync" data-action="steam-avatar" data-id="${esc(r.id)}" type="button">↻ STEAM ФОТО</button>` : ''}<button class="action-btn" data-action="approved" data-id="${esc(r.id)}">✓ ПРИНЯТЬ</button><button class="action-btn" data-action="rejected" data-id="${esc(r.id)}">× ОТКЛОНИТЬ</button><button class="action-btn danger" data-action="delete" data-id="${esc(r.id)}">УДАЛИТЬ</button></div></article>`;
   }).join('') : '<div class="empty-mini">Анкет нет или ни одна не соответствует фильтру.</div>';
   const eligible = rows.filter(r => r.status !== 'rejected');
   ['leftPlayer', 'rightPlayer'].forEach(id => {
@@ -343,6 +359,16 @@ async function init() {
     renderHeroes();
   });
 
+  document.querySelectorAll('[data-reg-mode]').forEach(btn => btn.addEventListener('click', () => {
+    const mode=btn.dataset.regMode;
+    $('soloRegistration').hidden=mode!=='solo';
+    $('teamRegistration').hidden=mode!=='team';
+    document.querySelectorAll('[data-reg-mode]').forEach(item=>{
+      const active=item.dataset.regMode===mode;
+      item.classList.toggle('active',active);
+      item.setAttribute('aria-pressed',String(active));
+    });
+  }));
   $('registerForm').addEventListener('submit', submitRegistration);
   $('loginForm').addEventListener('submit', signIn);
   $('logout').addEventListener('click', logout);
@@ -350,7 +376,7 @@ async function init() {
   $('exportCsv').addEventListener('click', () => exportData('csv'));
   $('adminStatusFilter').addEventListener('change', e => { state.adminStatus = e.target.value; renderAdmin(); });
   $('adminSearch').addEventListener('input', renderAdmin);
-  $('adminRows').addEventListener('click', e => { const action = e.target.closest('[data-action]'); if (action) setStatus(action.dataset.id, action.dataset.action); });
+  $('adminRows').addEventListener('click', e => { const action = e.target.closest('[data-action]'); if (!action) return; if(action.dataset.action==='captain') tournament.setCaptainForPlayer(action.dataset.id); else setStatus(action.dataset.id, action.dataset.action); });
   $('broadcastForm').addEventListener('submit', saveBroadcast);
   document.querySelectorAll('[data-copy-overlay]').forEach(el => el.addEventListener('click', () => copyOverlay(el.dataset.copyOverlay)));
   // Сразу показываем выбор героев, не ожидая внешних API и CDN.

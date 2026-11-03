@@ -1,11 +1,11 @@
 // Турнир: публичные команды и single-elimination сетка, приватная панель составов.
-import {db, configured, demo, escapeHTML as esc} from './db.js';
+import {db, configured, demo, escapeHTML as esc, FALLBACK_HEROES} from './db.js';
 const $ = id => document.getElementById(id);
 const key = 'deadlock_tournament_demo_v1';
 function demoRead() {
   try {
     const saved = JSON.parse(localStorage.getItem(key));
-    if (saved && Array.isArray(saved.teams)) return saved;
+    if (saved && Array.isArray(saved.teams)) return {...saved, guestMembers:saved.guestMembers||[], teamRequests:saved.teamRequests||[]};
   } catch { /* first visit */ }
   return {
     teams: [{id:'demo-team-one',name:'HEALING RITE',team_color:'#B6FF00',logo_url:'',created_at:'2026-01-01'},
@@ -13,7 +13,7 @@ function demoRead() {
     members: [{registration_id:'sample-0',team_id:'demo-team-one'},
       {registration_id:'sample-1',team_id:'demo-team-one'},
       {registration_id:'sample-2',team_id:'demo-team-two'}],
-    matches: [], broadcast: {id:1,round_no:null,match_no:null,visible:false}
+    guestMembers: [], teamRequests: [], matches: [], broadcast: {id:1,round_no:null,match_no:null,visible:false}
   };
 }
 const demoSave = d => localStorage.setItem(key,JSON.stringify(d));
@@ -27,7 +27,7 @@ const errorMessage = error => {
 const matchupKey = m => `${m.round_no}-${m.match_no}`;
 
 export function createTournamentController({isAdmin, getRegistrations}) {
-  const data = {teams: [], publicMembers: [], members: [], matches: [], broadcast: null};
+  const data = {teams: [], publicMembers: [], members: [], guests: [], requests: [], matches: [], broadcast: null};
   let active = false;
   const flash = (message, type='ok', target='tournamentMessage') => {
     const el = $(target); if (!el) return;
@@ -48,10 +48,11 @@ export function createTournamentController({isAdmin, getRegistrations}) {
         return `<img class="${cls}" src="${esc(u.href)}" alt="">`;
     } catch {} return `<span class="${cls} dc-logo-placeholder">✦</span>`;
   };
-  const teamPlayers = id => data.publicMembers.filter(m=>m.team_id===id);
+  const teamPlayers = id => data.publicMembers.filter(m=>m.team_id===id).sort((a,b)=>Boolean(b.is_captain)-Boolean(a.is_captain) || a.nickname.localeCompare(b.nickname,'ru'));
   const adminsPlayers = id => data.members.filter(m=>m.team_id===id)
     .map(m=>getRegistrations().find(r=>r.id===m.registration_id)).filter(Boolean)
     .sort((a,b)=>a.nickname.localeCompare(b.nickname,'ru'));
+  const adminTeamPlayers = id => [...adminsPlayers(id).map(r=>({...r,guest:false})), ...data.guests.filter(g=>g.team_id===id).map(g=>({...g,guest:true}))].sort((a,b)=>a.nickname.localeCompare(b.nickname,'ru'));
   const eligible = () => getRegistrations().filter(r=>r.status==='approved')
     .sort((a,b)=>a.nickname.localeCompare(b.nickname,'ru'));
 
@@ -61,7 +62,7 @@ export function createTournamentController({isAdmin, getRegistrations}) {
       const players = teamPlayers(team.id);
       return `<article class="t-team-card" style="--team-accent:${colorFor(team)}"><div class="t-team-heading"><span class="t-team-number">${String(i+1).padStart(2,'0')}</span>${logoMarkup(team)}
         <div><h3>${esc(team.name)}</h3><small>${players.length} / 6 ИГРОКОВ</small></div><span class="t-team-mark">D//</span></div>
-        <div class="t-team-playerlist">${players.length ? players.map((p,k)=>`<div class="t-team-player"><span>${String(k+1).padStart(2,'0')}</span>${avatarMarkup(p.avatar_url)}<b>${esc(p.nickname)}</b></div>`).join('') : '<div class="t-team-empty">Состав пока не заполнен</div>'}</div></article>`;
+        <div class="t-team-playerlist">${players.length ? players.map((p,k)=>`<div class="t-team-player"><span>${String(k+1).padStart(2,'0')}</span>${avatarMarkup(p.avatar_url)}<b>${esc(p.nickname)}</b>${p.is_captain?'<span class="team-captain-tag">★ КАПИТАН</span>':''}</div>`).join('') : '<div class="t-team-empty">Состав пока не заполнен</div>'}</div></article>`;
     }).join('') : '<div class="t-placeholder">Команды ещё не сформированы. Как только организатор создаст составы, они появятся здесь.</div>';
   }
   function bracketHtml(admin=false) {
@@ -94,19 +95,21 @@ export function createTournamentController({isAdmin, getRegistrations}) {
     const assigned = new Set(data.members.map(m=>m.registration_id));
     const spare = entries.filter(r=>!assigned.has(r.id));
     $('adminTeamCount').textContent = data.teams.length;
-    $('tournamentPlayerStats').textContent = `${assigned.size} В СОСТАВАХ / ${spare.length} В РЕЗЕРВЕ`;
-    const options = (selected) => `<option value="">— РЕЗЕРВ —</option>` + data.teams.map(t=>`<option value="${esc(t.id)}" ${selected===t.id?'selected':''}>${esc(t.name)} (${adminsPlayers(t.id).length}/6)</option>`).join('');
+    $('tournamentPlayerStats').textContent = `${assigned.size+data.guests.length} В СОСТАВАХ / ${spare.length} В РЕЗЕРВЕ`;
+    const options = (selected) => `<option value="">— РЕЗЕРВ —</option>` + data.teams.map(t=>`<option value="${esc(t.id)}" ${selected===t.id?'selected':''}>${esc(t.name)} (${adminTeamPlayers(t.id).length}/6)</option>`).join('');
     $('unassignedPlayers').innerHTML = spare.length ? spare.map(r=>`<div class="t-player-pill" draggable="true" data-player-id="${esc(r.id)}">
       <span class="t-drag-handle">⠿</span>${avatarMarkup(r.steam_avatar_url)}<b>${esc(r.nickname)}</b><select class="t-assignment-select" data-player-id="${esc(r.id)}" aria-label="Назначить команду игроку ${esc(r.nickname)}"><option value="">В КОМАНДУ...</option>${data.teams.map(t=>`<option value="${esc(t.id)}">${esc(t.name)}</option>`).join('')}</select></div>`).join('') : '<div class="t-empty-short">Нет свободных принятых игроков.</div>';
     $('adminTeamsGrid').innerHTML = data.teams.length ? data.teams.map(t=>{
-      const players=adminsPlayers(t.id);
+      const players=adminTeamPlayers(t.id);
       return `<section class="t-admin-team" data-team-id="${esc(t.id)}" style="--team-accent:${colorFor(t)}"><div class="t-admin-team-head">${logoMarkup(t)}<div><h3>${esc(t.name)}</h3><small>${players.length} / 6 МЕСТ ЗАНЯТО</small></div>
       <div class="t-admin-team-actions"><button type="button" data-t-action="edit-team" data-team-id="${esc(t.id)}" title="Цвет и эмблема">◈</button><button type="button" data-t-action="rename-team" data-team-id="${esc(t.id)}" title="Переименовать">✎</button>
       <button type="button" data-t-action="delete-team" data-team-id="${esc(t.id)}" title="Удалить">×</button></div></div>
-      <div class="t-team-dropzone" data-drop-team="${esc(t.id)}">${players.map((r,i)=>`<div class="t-player-pill" draggable="true" data-player-id="${esc(r.id)}">
-      <span class="t-drag-handle">⠿</span>${avatarMarkup(r.steam_avatar_url)}<b><small>${i+1}.</small> ${esc(r.nickname)}</b>
-      <select class="t-assignment-select" data-player-id="${esc(r.id)}" aria-label="Команда игрока ${esc(r.nickname)}">${options(t.id)}</select></div>`).join('')}
-      ${Array.from({length:6-players.length},()=>'<div class="t-slot-empty">+ Перетащите игрока сюда</div>').join('')}</div></section>`;
+      <div class="t-team-dropzone" data-drop-team="${esc(t.id)}">${players.map((r,i)=>`<div class="t-player-pill ${r.guest?'t-guest-row':''}" ${r.guest?'':`draggable="true" data-player-id="${esc(r.id)}"`}>
+      <span class="t-drag-handle">${r.guest?'◇':'⠿'}</span>${avatarMarkup(r.steam_avatar_url)}<b><small>${i+1}.</small> ${esc(r.nickname)}</b>
+      ${t.captain_nickname?.toLowerCase()===r.nickname.toLowerCase()?'<span class="team-captain-tag">★ КАПИТАН</span>':''}
+      ${r.guest?`<span class="t-guest-note">АНКЕТА КОМАНДЫ</span><button class="t-guest-action" data-t-action="guest-info" data-guest-id="${esc(r.id)}">ДАННЫЕ</button><button class="t-guest-action" data-t-action="remove-guest" data-guest-id="${esc(r.id)}">УБРАТЬ</button>`:`<select class="t-assignment-select" data-player-id="${esc(r.id)}" aria-label="Команда игрока ${esc(r.nickname)}">${options(t.id)}</select>`}
+      <button class="t-captain-action" data-t-action="captain" data-team-id="${esc(t.id)}" data-nickname="${esc(r.nickname)}" ${t.captain_nickname?.toLowerCase()===r.nickname.toLowerCase()?'disabled':''}>${t.captain_nickname?.toLowerCase()===r.nickname.toLowerCase()?'КАПИТАН':'★ СДЕЛАТЬ КАПИТАНОМ'}</button></div>`).join('')}
+      ${Array.from({length:Math.max(0,6-players.length)},()=>'<div class="t-slot-empty">+ Перетащите игрока сюда</div>').join('')}</div></section>`;
     }).join('') : '<div class="t-placeholder">Создайте первую команду. Затем распределите принятых игроков из резерва.</div>';
     $('adminBracket').innerHTML = bracketHtml(true);
     $('stopOnAir').disabled = !data.broadcast?.visible;
@@ -118,21 +121,24 @@ export function createTournamentController({isAdmin, getRegistrations}) {
     try {
       if (configured) {
         let [teams,roster,matches,broadcast] = await Promise.all([
-          db.from('tournament_teams').select('id,name,team_color,logo_url,created_at').order('created_at'),
-          db.rpc('get_public_team_roster'),
+          db.from('tournament_teams').select('id,name,team_color,logo_url,captain_nickname,created_at').order('created_at'),
+          db.rpc('get_public_team_roster_v35'),
           db.from('tournament_matches').select('round_no,match_no,left_team,right_team,score_left,score_right,winner').order('round_no').order('match_no'),
           db.from('tournament_broadcast').select('id,round_no,match_no,visible').eq('id',1).single()
         ]);
-        if (teams.error && /team_color|logo_url/.test(String(teams.error.message || ''))) {
+        if (teams.error && /team_color|logo_url|captain_nickname/.test(String(teams.error.message || ''))) {
           const basic = await db.from('tournament_teams').select('id,name,created_at').order('created_at');
-          teams = {...basic, data:(basic.data || []).map(t=>({...t,team_color:'#B6FF00',logo_url:''}))};
+          teams = {...basic, data:(basic.data || []).map(t=>({...t,team_color:'#B6FF00',logo_url:'',captain_nickname:''}))};
+        }
+        if (roster.error && /get_public_team_roster_v35|function .* does not exist/i.test(String(roster.error.message||''))) {
+          roster = await db.rpc('get_public_team_roster');
         }
         for (const part of [teams,roster,matches,broadcast]) if(part.error)throw part.error;
         data.teams=teams.data||[];data.publicMembers=roster.data||[];data.matches=matches.data||[];data.broadcast=broadcast.data;
       } else {
         const saved=demoRead();
         data.teams=saved.teams;data.matches=saved.matches;data.broadcast=saved.broadcast;
-        data.publicMembers=saved.members.map(m=>({team_id:m.team_id,nickname:demo.getRegistrations().find(r=>r.id===m.registration_id&&r.status==='approved')?.nickname})).filter(m=>m.nickname);
+        data.publicMembers=[...saved.members.map(m=>({team_id:m.team_id,nickname:demo.getRegistrations().find(r=>r.id===m.registration_id&&r.status==='approved')?.nickname})).filter(m=>m.nickname), ...(saved.guestMembers||[]).map(g=>({team_id:g.team_id,nickname:g.nickname,is_guest:true}))].map(m=>({...m,is_captain:saved.teams.find(t=>t.id===m.team_id)?.captain_nickname?.toLowerCase()===m.nickname.toLowerCase()}));
       }
       renderPublicTeams();renderPublicBracket();
       $('tournamentMigrationNotice').hidden=true;
@@ -149,9 +155,13 @@ export function createTournamentController({isAdmin, getRegistrations}) {
       if (configured) {
         const {data:members,error}=await db.from('team_members').select('registration_id,team_id');
         if(error)throw error;data.members=members||[];
-      } else data.members=demoRead().members;
+        const {data:guests,error:ge}=await db.from('team_guest_members').select('id,team_id,nickname,discord,steam_profile,hours,region,hero_names,notes');
+        if(ge && !/does not exist|team_guest_members/i.test(ge.message||''))throw ge;
+        data.guests=guests||[];
+      } else { const saved=demoRead(); data.members=saved.members; data.guests=saved.guestMembers||[]; }
       await loadPublic();
       renderAdminTeams();
+      await loadTeamRequests();
     } catch(error) { flash(`Не удалось открыть ростер: ${errorMessage(error)}`,'error'); }
   }
   async function action(operation,success,target='tournamentMessage') {
@@ -245,7 +255,7 @@ export function createTournamentController({isAdmin, getRegistrations}) {
     const team=data.teams.find(t=>t.id===id);if(!team||!confirm(`Удалить «${team.name}»? Её игроки вернутся в резерв. Если команда участвует в сетке, сначала очисти сетку.`))return;
     await action(async()=>{
       if(configured){const {error}=await db.from('tournament_teams').delete().eq('id',id);if(error)throw error;}
-      else{const d=demoRead();if(d.matches.some(m=>[m.left_team,m.right_team,m.winner].includes(id)))throw new Error('Сначала очистите турнирную сетку');d.teams=d.teams.filter(t=>t.id!==id);d.members=d.members.filter(m=>m.team_id!==id);demoSave(d);}
+      else{const d=demoRead();if(d.matches.some(m=>[m.left_team,m.right_team,m.winner].includes(id)))throw new Error('Сначала очистите турнирную сетку');d.teams=d.teams.filter(t=>t.id!==id);d.members=d.members.filter(m=>m.team_id!==id);d.guestMembers=(d.guestMembers||[]).filter(g=>g.team_id!==id);demoSave(d);}
     },'Команда удалена.');
   }
   const pendingMoves=new Set();
@@ -256,6 +266,7 @@ export function createTournamentController({isAdmin, getRegistrations}) {
     if(teamId&&!data.teams.some(t=>t.id===teamId))return flash('Выбранная команда не найдена.','error','tournamentRosterMessage');
     const existing=data.members.find(m=>m.registration_id===playerId);
     if((existing?.team_id||'')===teamId)return;
+    if(teamId && data.guests.some(g=>g.team_id===teamId && g.nickname.toLowerCase()===player.nickname.toLowerCase())) return flash('В составе уже есть этот ник из командной заявки. Сначала нажми «УБРАТЬ» у гостевого ника, затем добавь зарегистрированного игрока.','error','tournamentRosterMessage');
     pendingMoves.add(playerId);
     try {
       await action(async()=>{
@@ -282,7 +293,7 @@ export function createTournamentController({isAdmin, getRegistrations}) {
           const d=demoRead();
           d.members=d.members.filter(m=>m.registration_id!==playerId);
           if(teamId){
-            if(d.members.filter(m=>m.team_id===teamId).length>=6)throw new Error('В команде уже 6 игроков');
+            if(d.members.filter(m=>m.team_id===teamId).length+(d.guestMembers||[]).filter(g=>g.team_id===teamId).length>=6)throw new Error('В команде уже 6 игроков');
             d.members.push({registration_id:playerId,team_id:teamId});
           }
           demoSave(d);
@@ -290,6 +301,161 @@ export function createTournamentController({isAdmin, getRegistrations}) {
       },teamId?`Игрок «${player.nickname}» добавлен в команду «${teamName(teamId)}».`:`Игрок «${player.nickname}» отправлен в резерв.`,'tournamentRosterMessage');
     } finally {pendingMoves.delete(playerId);}
   }
+  async function setCaptain(teamId,nickname) {
+    if(!isAdmin())return;
+    await action(async()=>{
+      if(configured){const {error}=await db.rpc('set_team_captain_v35',{p_team_id:teamId,p_nickname:nickname});if(error)throw error;}
+      else {const d=demoRead();const t=d.teams.find(t=>t.id===teamId);if(!t)throw new Error('Команда не найдена');t.captain_nickname=nickname;demoSave(d);}
+    },`★ ${nickname} теперь капитан команды «${teamName(teamId)}».`,'tournamentRosterMessage');
+  }
+  async function setCaptainForPlayer(playerId) {
+    if(!isAdmin())return;
+    const member=data.members.find(m=>m.registration_id===playerId);
+    const player=getRegistrations().find(r=>r.id===playerId);
+    if(!member || !player)return flash('Сначала добавь игрока в команду, затем назначь капитаном.','error','tournamentRosterMessage');
+    await setCaptain(member.team_id,player.nickname);
+  }
+  async function removeGuest(guestId) {
+    if(!isAdmin())return;
+    await action(async()=>{
+      if(configured){const {error}=await db.rpc('remove_team_guest_v35',{p_guest_id:guestId});if(error)throw error;}
+      else {const d=demoRead();const g=d.guestMembers.find(g=>g.id===guestId);if(!g)return;d.guestMembers=d.guestMembers.filter(g=>g.id!==guestId);const t=d.teams.find(t=>t.id===g.team_id);if(t?.captain_nickname===g.nickname)t.captain_nickname='';demoSave(d);}
+    },'Ник удалён из команды. Теперь можно назначить зарегистрированного игрока.','tournamentRosterMessage');
+  }
+  function initTeamMemberForms(){
+    const host=$('teamMemberForms');if(!host)return;
+    const heroOptions='<option value="">— Выбрать героя —</option>'+[...FALLBACK_HEROES].sort((a,b)=>a.name.localeCompare(b.name,'en')).map(h=>`<option value="${esc(h.name)}">${esc(h.name)}</option>`).join('');
+    host.innerHTML=Array.from({length:6},(_,i)=>`<section class="team-profile-card" data-slot="${i}">
+      <div class="team-profile-card-heading"><strong>${String(i+1).padStart(2,'0')} · ${i===0?'КАПИТАН':'ИГРОК'}</strong><span>${i<2?'ОБЯЗАТЕЛЬНАЯ АНКЕТА':'НЕОБЯЗАТЕЛЬНЫЙ СЛОТ'}</span></div>
+      <div class="team-profile-grid">
+        <label class="field"><span>Ник в Deadlock ${i<2?'<b>*</b>':''}</span><input class="member-nickname" ${i===0?'id="requestCaptain"':''} ${i<2?'required':''} minlength="2" maxlength="32" autocomplete="off" placeholder="Игровой ник"></label>
+        <label class="field"><span>Discord ${i<2?'<b>*</b>':''}</span><input class="member-discord" ${i===0?'id="requestDiscord"':''} ${i<2?'required':''} minlength="2" maxlength="100" autocomplete="off" placeholder="Имя в Discord"></label>
+        <label class="field full"><span>Ссылка на Steam <small>необязательно</small></span><input class="member-steam" type="text" maxlength="200" autocomplete="off" placeholder="https://steamcommunity.com/id/..."></label>
+        <label class="field"><span>Часов в Deadlock</span><input class="member-hours" type="number" inputmode="numeric" value="0" min="0" max="10000" step="1"></label>
+        <label class="field"><span>Регион игрока</span><select class="member-region"><option value="EU">Европа</option><option value="NA">Северная Америка</option><option value="ASIA">Азия</option><option value="OTHER">Другой</option></select></label>
+        <div class="field full"><span>Любимые герои — от 1 до 3 для заполненного слота</span><div class="team-profile-heroes"><select class="member-hero" aria-label="Первый герой игрока ${i+1}">${heroOptions}</select><select class="member-hero" aria-label="Второй герой игрока ${i+1}">${heroOptions}</select><select class="member-hero" aria-label="Третий герой игрока ${i+1}">${heroOptions}</select></div></div>
+        <label class="field full"><span>Комментарий по игроку <small>необязательно</small></span><textarea class="member-notes" maxlength="800" rows="2" placeholder="Роль, опыт, расписание"></textarea></label>
+      </div></section>`).join('');
+    $('requestRegion').addEventListener('change',()=>{host.querySelectorAll('.member-region').forEach(select=>select.value=$('requestRegion').value);});
+  }
+  function getTeamMemberProfiles(){
+    const profiles=[];
+    for(const card of document.querySelectorAll('.team-profile-card')){
+      const slot=Number(card.dataset.slot);
+      const get=sel=>card.querySelector(sel).value.trim();
+      const nickname=get('.member-nickname'),discord=get('.member-discord'),steam_profile=get('.member-steam'),notes=get('.member-notes');
+      const rawHours=get('.member-hours');const hours=Number(rawHours);
+      const region=get('.member-region');
+      const hero_names=[...card.querySelectorAll('.member-hero')].map(s=>s.value).filter(Boolean);
+      const filled=slot<2||Boolean(nickname||discord||steam_profile||notes||hero_names.length||(rawHours!==''&&hours!==0));
+      if(!filled)continue;
+      const msg=(what)=>{throw new Error(`Игрок ${slot+1}: ${what}`);};
+      if(nickname.length<2||nickname.length>32)msg('укажи ник длиной 2–32 символа.');
+      if(discord.length<2||discord.length>100)msg('укажи Discord длиной 2–100 символов.');
+      if(steam_profile.length>200)msg('ссылка Steam слишком длинная.');
+      if(!rawHours||!Number.isInteger(hours)||hours<0||hours>10000)msg('количество часов должно быть от 0 до 10000.');
+      if(!['EU','NA','ASIA','OTHER'].includes(region))msg('выбери корректный регион.');
+      if(hero_names.length<1||hero_names.length>3||new Set(hero_names).size!==hero_names.length||hero_names.join(',').length>150)msg('выбери 1–3 разных героев.');
+      if(notes.length>800)msg('комментарий слишком длинный.');
+      profiles.push({nickname,discord,steam_profile,hours,region,hero_names,notes});
+    }
+    if(profiles.length<2||profiles.length>6)throw new Error('Заполни данные капитана и ещё минимум одного игрока (всего 2–6).');
+    if(new Set(profiles.map(p=>p.nickname.toLocaleLowerCase())).size!==profiles.length)throw new Error('Никнеймы участников не должны повторяться.');
+    return profiles;
+  }
+  async function submitTeamRequest(ev) {
+    ev.preventDefault();
+    const button=$('requestTeamSubmit'), box=$('requestTeamMessage');
+    const show=(text,type='ok')=>{box.textContent=text;box.className=`message ${type}`;};
+    const team_name=$('requestTeamName').value.trim(),note=$('requestNote').value.trim(),region=$('requestRegion').value;
+    if(team_name.length<2||team_name.length>36||note.length>800)return show('Проверь название команды и комментарий.','error');
+    if(!$('requestConsent').checked)return show('Нужно подтвердить разрешение всех игроков на передачу данных.','error');
+    let profiles;
+    try{profiles=getTeamMemberProfiles();}catch(error){show(error.message,'error');return;}
+    const payload={team_name,region,note,captain_nickname:profiles[0].nickname,captain_discord:profiles[0].discord,member_nicknames:profiles.map(p=>p.nickname),member_profiles:profiles};
+    button.disabled=true;button.textContent='ОТПРАВКА...';
+    try{
+      if(configured){const {error}=await db.from('team_registration_requests').insert(payload);if(error)throw error;}
+      else{const d=demoRead();d.teamRequests.unshift({id:crypto.randomUUID(),...payload,status:'pending',created_at:new Date().toISOString()});demoSave(d);}
+      $('teamRequestForm').reset();$('requestRegion').dispatchEvent(new Event('change'));
+      show('Анкеты команды отправлены организатору. После одобрения состав появится на сайте.');
+      if(isAdmin())await loadTeamRequests();
+    }catch(e){
+      const reason=errorMessage(e);
+      show(/member_profiles|column.*not found|schema cache/i.test(reason)?'Сначала выполни SQL-миграцию supabase/upgrade-team-profiles-v3.6.sql в Supabase. '+reason:reason,'error');
+    }finally{button.disabled=false;button.textContent='ОТПРАВИТЬ КОМАНДУ НА ПРОВЕРКУ ↗';}
+  }
+
+  const privateSteamLabel=value=>{
+    try{const url=new URL(value);return url.protocol==='https:'&&url.hostname==='steamcommunity.com'?`<a href="${esc(url.href)}" rel="noopener noreferrer" target="_blank">${esc(value)}</a>`:esc(value||'—');}
+    catch{return esc(value||'—');}
+  };
+  const infoCells=profile=>`<dl class="team-profile-private-details">
+    <div><dt>Discord</dt><dd>${esc(profile.discord||'—')}</dd></div>
+    <div><dt>Steam</dt><dd>${privateSteamLabel(profile.steam_profile)}</dd></div>
+    <div><dt>Часы</dt><dd>${Number.isFinite(Number(profile.hours))?Number(profile.hours):'—'}</dd></div>
+    <div><dt>Регион</dt><dd>${esc(profile.region||'—')}</dd></div>
+    <div class="wide"><dt>Герои</dt><dd>${esc((profile.hero_names||[]).join(' · ')||'—')}</dd></div>
+    <div class="wide"><dt>Комментарий</dt><dd>${esc(profile.notes||'—')}</dd></div>
+  </dl>`;
+  function renderTeamRequests(){
+    const host=$('teamApplicationsList');if(!host)return;
+    const requests=[...data.requests].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+    host.innerHTML=requests.length?requests.map(q=>{
+      const profiles=Array.isArray(q.member_profiles)&&q.member_profiles.length?q.member_profiles:q.member_nicknames.map((nickname,i)=>({nickname,discord:i===0?q.captain_discord:'',hero_names:[]}));
+      return `<article class="team-application">
+        <div class="team-application-head"><div><h4>${esc(q.team_name)}</h4><small>${new Date(q.created_at).toLocaleString('ru-RU')} · ${esc(q.region)} · ${q.member_nicknames?.length||0}/6 игроков</small></div><span class="state ${esc(q.status)}">${q.status==='pending'?'ОЖИДАЕТ':q.status==='approved'?'ПРИНЯТА':'ОТКЛОНЕНА'}</span></div>
+        <div class="team-application-profiles">${profiles.map((p,i)=>`<details class="team-application-profile" ${i===0?'open':''}>
+          <summary><b>${i===0?'★ КАПИТАН':'ИГРОК '+(i+1)}</b><span>${esc(p.nickname)}</span><small>Данные анкеты ▾</small></summary>
+          ${infoCells(p)}
+        </details>`).join('')}</div>
+        ${q.note?`<div class="team-application-private">Комментарий по команде: ${esc(q.note)}</div>`:''}
+        ${!Array.isArray(q.member_profiles)||!q.member_profiles.length?'<p class="team-profile-old">Это старая заявка v3.5: полные данные игроков капитан тогда не заполнял.</p>':''}
+        ${q.status==='pending'?`<div class="team-application-actions"><button class="btn btn-primary" type="button" data-t-action="accept-request" data-request-id="${esc(q.id)}">✓ ПРИНЯТЬ КОМАНДУ</button><button class="btn btn-outline" type="button" data-t-action="reject-request" data-request-id="${esc(q.id)}">ОТКЛОНИТЬ</button></div>`:''}
+      </article>`;
+    }).join(''):'<div class="empty-mini">Заявок на команды пока нет.</div>';
+  }
+  function openGuestInfo(id){
+    if(!isAdmin())return;
+    const g=data.guests.find(g=>g.id===id);
+    if(!g)return;
+    $('guestInfoContent').innerHTML=`<h4>${esc(g.nickname)}</h4>${infoCells(g)}<p class="team-profile-old">Поля указаны капитаном. Данные уже зарегистрированного игрока хранятся в его собственной анкете.</p>`;
+    $('guestInfoPanel').hidden=false;
+    $('guestInfoPanel').scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+
+  async function loadTeamRequests(){
+    if(!isAdmin())return;
+    try{
+      if(configured){const {data:requests,error}=await db.from('team_registration_requests').select('id,team_name,captain_nickname,captain_discord,region,member_nicknames,member_profiles,note,status,created_at').order('created_at',{ascending:false}).limit(100);if(error)throw error;data.requests=requests||[];}
+      else data.requests=demoRead().teamRequests||[];
+      renderTeamRequests();
+    }catch(e){$('teamApplicationMessage').textContent=`Заявки команд: ${errorMessage(e)}. Проверь миграцию upgrade-team-registration-v3.5.sql`;}
+  }
+  async function reviewRequest(id,approve){
+    if(!isAdmin())return;
+    const box=$('teamApplicationMessage');box.textContent='';box.className='message';
+    try{
+      if(configured){const {error}=await db.rpc('review_team_registration',{p_request_id:id,p_approve:approve});if(error)throw error;}
+      else{
+        const d=demoRead(),q=d.teamRequests.find(q=>q.id===id);
+        if(!q||q.status!=='pending')throw new Error('Заявка уже обработана');
+        if(approve){if(d.teams.some(t=>t.name.toLowerCase()===q.team_name.toLowerCase()))throw new Error('Название команды занято');
+          const idNew=crypto.randomUUID();
+          const guestMembers=[];const registered=[];
+          for(const nickname of q.member_nicknames){const r=demo.getRegistrations().find(x=>x.nickname.toLowerCase()===nickname.toLowerCase()&&x.status==='approved');
+            if(r){if(d.members.some(m=>m.registration_id===r.id))throw new Error(`Игрок ${nickname} уже состоит в команде`);registered.push({registration_id:r.id,team_id:idNew});}
+            else {const profile=(q.member_profiles||[]).find(p=>p.nickname.toLocaleLowerCase()===nickname.toLocaleLowerCase())||{};guestMembers.push({id:crypto.randomUUID(),team_id:idNew,nickname,...profile});}}
+          if((d.guestMembers||[]).some(g=>guestMembers.some(n=>n.nickname.toLowerCase()===g.nickname.toLowerCase())))throw new Error('Один из ников уже занят');
+          d.teams.push({id:idNew,name:q.team_name,captain_nickname:q.captain_nickname,team_color:'#B6FF00',logo_url:'',created_at:new Date().toISOString()});
+          d.members.push(...registered);d.guestMembers.push(...guestMembers);q.status='approved';q.approved_team_id=idNew;
+        } else q.status='rejected';demoSave(d);
+      }
+      box.textContent=approve?'Команда одобрена и опубликована.':'Заявка команды отклонена.';
+      await loadAdmin();
+    }catch(e){box.textContent=errorMessage(e);box.className='message error';}
+  }
+
   // Стандартное размещение сида: 1–8, 4–5, 2–7, 3–6 и т. п.
   function seeding(teamIds) {
     let size=2;while(size<teamIds.length)size*=2;
@@ -354,6 +520,10 @@ export function createTournamentController({isAdmin, getRegistrations}) {
   }
   function listen() {
     $('createTeamForm').addEventListener('submit',createTeam);
+    initTeamMemberForms();
+    $('teamRequestForm').addEventListener('submit',submitTeamRequest);
+    $('closeGuestInfo').addEventListener('click',()=>{$('guestInfoPanel').hidden=true;});
+    $('refreshTeamApplications').addEventListener('click',loadTeamRequests);
     $('dcTeamEditorForm').addEventListener('submit',saveDesign);
     $('dcCloseEditor').addEventListener('click',closeEditor);
     $('dcClearTeamLogo').addEventListener('click',clearTeamLogo);
@@ -367,6 +537,9 @@ export function createTournamentController({isAdmin, getRegistrations}) {
       if(type==='edit-team')return openEditor(btn.dataset.teamId);
       if(type==='rename-team')return renameTeam(btn.dataset.teamId);
       if(type==='delete-team')return deleteTeam(btn.dataset.teamId);
+      if(type==='captain')return setCaptain(btn.dataset.teamId,btn.dataset.nickname);
+      if(type==='remove-guest')return removeGuest(btn.dataset.guestId);
+      if(type==='guest-info')return openGuestInfo(btn.dataset.guestId);
       const wrap=btn.closest('.t-match-controls');if(!wrap)return;
       const round=Number(wrap.dataset.round),match=Number(wrap.dataset.match);
       if(type==='on-air')return broadcastMatch(round,match,true);
@@ -376,6 +549,7 @@ export function createTournamentController({isAdmin, getRegistrations}) {
         return setMatchResult(round,match,Number(inputs[0].value),Number(inputs[1].value));
       }
     });
+    $('teamApplicationsList').addEventListener('click',e=>{const btn=e.target.closest('[data-t-action]');if(!btn)return;if(btn.dataset.tAction==='accept-request')reviewRequest(btn.dataset.requestId,true);if(btn.dataset.tAction==='reject-request')reviewRequest(btn.dataset.requestId,false);});
     adminArea.addEventListener('change',e=>{
       const dropdown=e.target.closest('.t-assignment-select');
       if(dropdown)movePlayer(dropdown.dataset.playerId,dropdown.value);
@@ -398,5 +572,5 @@ export function createTournamentController({isAdmin, getRegistrations}) {
     $('unassignedDropzone').addEventListener('drop',e=>{e.preventDefault();const id=e.dataTransfer.getData('text/plain');if(id)movePlayer(id,'');});
   }
   function init() { active=true;listen(); }
-  return {init,loadPublic,loadAdmin,renderAdminTeams};
+  return {init,loadPublic,loadAdmin,renderAdminTeams,setCaptainForPlayer};
 }
