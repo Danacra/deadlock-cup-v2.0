@@ -1,7 +1,7 @@
 import { db, configured, initializeDatabase, demo, loadHeroes, FALLBACK_HEROES, escapeHTML as esc, heroImageSources } from './db.js';
 import { createTournamentController } from './tournament.js';
 const $ = (id) => document.getElementById(id);
-const state = { view: 'register', heroes: [], selected: [], roster: [], registrations: [], broadcast: null, isAdmin: false, adminStatus: 'all', heroFocus: '' };
+const state = { view: 'register', heroes: [], selected: [], roster: [], registrations: [], broadcast: null, isAdmin: false, adminStatus: 'all' };
 const tournament = createTournamentController({isAdmin:()=>state.isAdmin,getRegistrations:()=>state.registrations});
 const message = (id, text, type = 'ok') => { const el = $(id); el.textContent = text; el.className = `message ${type}`; };
 const errorText = (err) => {
@@ -66,11 +66,6 @@ function renderHeroes({resetScroll = false} = {}) {
   }).join('') : '<div class="empty-mini">Ничего не найдено.</div>';
   grid.scrollTop = savedScroll;
 }
-function updateModelSelection() {
-  const name = state.heroFocus || state.selected[0] || '';
-  const label = $('modelSelectionLabel');
-  if (label) label.textContent = name ? `3D-просмотр: ${name}` : 'Выбери героя из списка ниже';
-}
 function getRosterForDemo() {
   return demo.getRegistrations().filter(r => r.status !== 'rejected').map(r => ({nickname: r.nickname}));
 }
@@ -129,7 +124,7 @@ async function submitRegistration(event) {
       rows.unshift({id:crypto.randomUUID(), ...row, status:'pending', submitted_at: new Date().toISOString()});
       demo.saveRegistrations(rows);
     }
-    $('registerForm').reset(); $('hours').value = '0'; state.selected = []; state.heroFocus = ''; renderHeroes(); updateModelSelection();
+    $('registerForm').reset(); $('hours').value = '0'; state.selected = []; renderHeroes();
     message('registerMessage', 'Заявка успешно отправлена! Твой ник появится в списке участников.');
     await fetchRoster();
     if (state.isAdmin) await fetchRegistrations();
@@ -342,19 +337,10 @@ async function init() {
   $('heroesGrid').addEventListener('click', event => {
     const item = event.target.closest('[data-hero]'); if (!item) return;
     const name = item.dataset.hero;
-    state.heroFocus = name;
     if (state.selected.includes(name)) state.selected = state.selected.filter(n => n !== name);
     else if (state.selected.length < 3) state.selected.push(name);
-    else { updateModelSelection(); return message('registerMessage', 'Можно выбрать максимум трёх героев. 3D-просмотр выбранного героя доступен отдельно.', 'error'); }
+    else return message('registerMessage', 'Можно выбрать максимум трёх героев.', 'error');
     renderHeroes();
-    updateModelSelection();
-  });
-  $('openHero3D').addEventListener('click', () => {
-    const name = state.heroFocus || state.selected[0];
-    if (!name) return message('registerMessage','Сначала выбери героя, чтобы открыть 3D-просмотр.','error');
-    const url = new URL('./viewer.html', window.location.href);
-    url.searchParams.set('hero', name);
-    window.open(url.href, '_blank', 'noopener,noreferrer');
   });
 
   $('registerForm').addEventListener('submit', submitRegistration);
@@ -370,7 +356,6 @@ async function init() {
   // Сразу показываем выбор героев, не ожидая внешних API и CDN.
   state.heroes = FALLBACK_HEROES;
   renderHeroes();
-  updateModelSelection();
   window.dispatchEvent(new CustomEvent('deadlock:heroes',{detail:state.heroes}));
   $('heroLoadStatus').textContent = `${state.heroes.length} героев доступны сразу. Обновляем портреты...`;
   loadHeroes().then(({heroes, online}) => {
