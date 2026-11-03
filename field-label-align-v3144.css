@@ -1,0 +1,8 @@
+/* Deadlock Cup v3.14.4 — precise label/input alignment.
+   Input text begins after the 1px border + 13px horizontal padding.
+   Apply the same 14px inset to the labels, including dynamically added
+   team player forms. Leave controls and their sizes untouched. */
+.field > span:first-child {
+  padding-inline-start: 14px;
+  box-sizing: border-box;
+}
