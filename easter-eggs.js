@@ -1,182 +1,161 @@
-/* Deadlock Cup v3.11 — reliably discoverable lore Easter eggs; no data or Supabase dependency. */
+/* Deadlock Cup v3.12 — all 11 supplied artworks, public views only. */
 (() => {
   'use strict';
-  const ASSET_ROOT = './easter-eggs/';
-  const RECORD_KEY = 'deadlock_cup_discoveries_v39';
-  const archive = [
-    {
-      id: 'archmother', title: 'Архиматерь',
-      image: 'archmother-mask.png', trigger: 'archmother-sigil.png',
-      logo: 'archmother-name.png', submark: 'guided-hand.png',
-      accent: '#a5cfe0',
-      message: 'Из темноты за тобой наблюдают. Кому принадлежит этот знак — и зачем он оставлен здесь?'
-    },
-    {
-      id: 'hidden-king', title: 'Скрытый король',
-      image: 'hidden-king-mask.png', trigger: 'hidden-king-sigil.png',
-      logo: 'hidden-king-name.png', submark: 'broken-crown.png',
-      accent: '#ffc15c',
-      message: 'Корона сломана. Но тот, кто её носил, ещё не рассказал свою последнюю историю.'
-    },
-    {
-      id: 'patron', title: 'Покровитель',
-      image: 'patron.png', trigger: 'patron.png',
-      logo: null, submark: null,
-      accent: '#d8ba73',
-      message: 'Нечто шевелится там, куда не падает свет. Этот знак появляется только внимательным.'
-    },
-    {
-      id: 'doorman', title: 'Привратник',
-      image: 'doorman.png', trigger: 'doorman.png',
-      logo: null, submark: null,
-      accent: '#82e6e2',
-      message: 'В этом городе почти у каждой двери есть ключ. А некоторые двери сами выбирают, кого впустить.'
-    },
-    {
-      id: 'drifter', title: 'Скиталец',
-      image: 'drifter-name.png', trigger: 'drifter-name.png',
-      logo: 'drifter-name.png', submark: null,
-      accent: '#edf2e8',
-      message: 'Незнакомое имя на стене. Оно было здесь всё это время — или появилось только сейчас?'
-    }
+  const ASSETS = './easter-eggs/';
+  const STORAGE = 'deadlock_cup_artifacts_v312';
+  const relics = [
+    {id:'archmother-mask',file:'archmother-mask.png',title:'Архиматерь',label:'Лик Архиматери',detail:'Узнаваемый силуэт в отблеске холодного света.',size:'mask',anchor:'intro-a',area:'intro'},
+    {id:'hidden-king-mask',file:'hidden-king-mask.png',title:'Скрытый король',label:'Взгляд из тьмы',detail:'Иногда самое важное скрывается за маской.',size:'mask',anchor:'intro-b',area:'intro'},
+    {id:'archmother-sigil',file:'archmother-sigil.png',title:'Архиматерь',label:'Знак Архиматери',detail:'Маленькая метка на полях объявления.',size:'sigil',anchor:'quote',area:'quote'},
+    {id:'guided-hand',file:'guided-hand.png',title:'Направляющая длань',label:'The Guided Hand',detail:'Кому-то здесь явно нравится оставлять подписи.',size:'wordmark',anchor:'info',area:'info'},
+    {id:'archmother-name',file:'archmother-name.png',title:'Архиматерь',label:'ARCHMOTHER',detail:'Тайное имя среди турнирных анкет.',size:'wordmark',anchor:'team',area:'team'},
+    {id:'hidden-king-sigil',file:'hidden-king-sigil.png',title:'Скрытый король',label:'Тайный знак',detail:'Никто не заметит его, если не присмотреться.',size:'sigil',anchor:'roster-a',area:'roster'},
+    {id:'hidden-king-name',file:'hidden-king-name.png',title:'Скрытый король',label:'HIDDEN KING',detail:'Имя осталось там, где его меньше всего ждут.',size:'wordmark',anchor:'roster-b',area:'roster'},
+    {id:'broken-crown',file:'broken-crown.png',title:'Сломанная корона',label:'The Broken Crown',detail:'Короны ломаются, но легенды остаются.',size:'wordmark',anchor:'teams-a',area:'teams'},
+    {id:'patron',file:'patron.png',title:'Покровитель',label:'Нечто в тени',detail:'Кто знает, кто наблюдает за составами команд?',size:'mask',anchor:'teams-b',area:'teams'},
+    {id:'doorman',file:'doorman.png',title:'Привратник',label:'Знак Привратника',detail:'Не всякая дверь ведёт туда, куда ожидаешь.',size:'portrait',anchor:'bracket-a',area:'bracket'},
+    {id:'drifter-name',file:'drifter-name.png',title:'Скиталец',label:'DRIFTER',detail:'Призрачная надпись среди будущих матчей.',size:'wordmark',anchor:'bracket-b',area:'bracket'}
   ];
-
-  // All slots are decorative areas. No free-floating hit targets over forms or admin controls.
-  const slots = [
-    {selector:'#pageIntro .hero-right', kind:'intro'},
-    {selector:'#view-register .info-quote', kind:'quote'},
-    {selector:'#view-roster .dc-view-hero', kind:'banner'},
-    {selector:'#view-teams .dc-view-hero', kind:'banner'},
-    {selector:'#view-bracket .dc-view-hero', kind:'banner'},
-    {selector:'#view-admin .dc-view-hero', kind:'banner'}
-  ];
-  const rand = (min,max) => min + Math.random() * (max-min);
-  const shuffle = a => {
-    const copy=[...a];
-    for(let i=copy.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]];}
-    return copy;
-  };
-  let overlay, panel, lastFocus, onModalKeydown;
-  let found = new Set();
+  let discovered = new Set();
   try {
-    const value = JSON.parse(localStorage.getItem(RECORD_KEY) || '[]');
-    if (Array.isArray(value)) found = new Set(value.filter(v=>archive.some(a=>a.id===v)));
-  } catch (_error) { /* local storage can be disabled; Easter eggs still work */ }
+    const value = JSON.parse(localStorage.getItem(STORAGE) || '[]');
+    if (Array.isArray(value)) discovered = new Set(value.filter(v => relics.some(r => r.id === v)));
+  } catch(_) { /* browsing without storage remains possible */ }
 
-  function image(src, className, alt) {
-    const el=document.createElement('img');
-    el.src=ASSET_ROOT+src;
-    el.className=className;
-    el.alt=alt;
-    el.decoding='async';
+  const random = (min,max) => min + Math.random()*(max-min);
+  const byId = id => document.getElementById(id);
+  let modal, dialog, previousFocus;
+
+  function imageFor(item, className, extra) {
+    const img = document.createElement('img');
+    img.src = ASSETS + item.file;
+    img.className = className;
+    img.alt = extra ? item.label : '';
+    img.loading = extra ? 'eager' : 'lazy';
+    img.decoding = 'async';
+    img.referrerPolicy = 'same-origin';
+    return img;
+  }
+
+  function makeModal() {
+    modal = document.createElement('div');
+    modal.className = 'dc-egg-backdrop';
+    modal.id='dcEasterEggOverlay';
+    modal.hidden = true;
+    modal.innerHTML = `
+      <section class="dc-egg-dialog" role="dialog" aria-modal="true" aria-labelledby="dcEasterEggTitle">
+        <button class="dc-egg-close" type="button" aria-label="Закрыть">×</button>
+        <div class="dc-egg-eyebrow">THE CURSED CITY / НАЙДЕН АРТЕФАКТ</div>
+        <div class="dc-egg-art-stage" id="dcEasterEggArtStage"></div>
+        <h2 id="dcEasterEggTitle"></h2>
+        <p class="dc-egg-description" id="dcEasterEggDescription"></p>
+        <div class="dc-egg-progress" id="dcEasterEggProgress"></div>
+        <div class="dc-egg-footer">Все 11 изображений спрятаны в публичных разделах сайта.</div>
+      </section>`;
+    dialog=modal.querySelector('.dc-egg-dialog');
+    modal.addEventListener('pointerdown', ev=>{if(ev.target===modal) close();});
+    modal.querySelector('.dc-egg-close').addEventListener('click',close);
+    document.body.append(modal);
+  }
+  function onKey(event){
+    if(event.key==='Escape'){event.preventDefault();close();}
+    if(event.key==='Tab'){
+      event.preventDefault();
+      modal.querySelector('.dc-egg-close').focus();
+    }
+  }
+  function close(){
+    if(!modal || modal.hidden) return;
+    modal.hidden=true;
+    document.body.classList.remove('dc-egg-modal-open');
+    document.removeEventListener('keydown',onKey);
+    if(previousFocus?.isConnected) previousFocus.focus({preventScroll:true});
+  }
+  function open(item){
+    if(!modal) makeModal();
+    previousFocus=document.activeElement;
+    const stage=byId('dcEasterEggArtStage');
+    stage.replaceChildren();
+    const img=imageFor(item,'dc-egg-art dc-egg-art-'+item.size,true);
+    const fallback=document.createElement('div');
+    fallback.className='dc-egg-art-fallback';
+    fallback.hidden=true;
+    fallback.textContent='Изображение не найдено. Проверь файл: /easter-eggs/'+item.file;
+    img.addEventListener('error',()=>{
+      img.remove(); fallback.hidden=false;
+      console.warn('Deadlock Cup: missing Easter egg image',img.src);
+    },{once:true});
+    const completeDiscovery=()=>{
+      if (!discovered.has(item.id)) {
+        discovered.add(item.id);
+        try{localStorage.setItem(STORAGE,JSON.stringify([...discovered]));}catch(_){}
+      }
+      byId('dcEasterEggProgress').textContent=`НАЙДЕНО: ${discovered.size} ИЗ ${relics.length}`;
+    };
+    img.addEventListener('load',completeDiscovery,{once:true});
+    stage.append(img,fallback);
+    if(img.complete && img.naturalWidth>0) completeDiscovery();
+    byId('dcEasterEggTitle').textContent=item.title+' · '+item.label;
+    byId('dcEasterEggDescription').textContent=item.detail;
+    byId('dcEasterEggProgress').textContent=`НАЙДЕНО: ${discovered.size} ИЗ ${relics.length}`;
+    modal.hidden=false;
+    document.body.classList.add('dc-egg-modal-open');
+    document.addEventListener('keydown',onKey);
+    modal.querySelector('.dc-egg-close').focus({preventScroll:true});
+  }
+
+  function marker(item){
+    const btn=document.createElement('button');
+    btn.type='button';
+    btn.className='dc-egg-piece dc-egg-'+item.size+' dc-egg-'+item.anchor;
+    btn.dataset.relic=item.id;
+    btn.title=item.label+' — исследовать';
+    btn.setAttribute('aria-label','Найти артефакт: '+item.label);
+    btn.style.setProperty('--egg-rotation',random(-9,9).toFixed(1)+'deg');
+    btn.style.setProperty('--egg-jitter-x',random(-5,5).toFixed(0)+'px');
+    btn.style.setProperty('--egg-jitter-y',random(-5,5).toFixed(0)+'px');
+    const img=imageFor(item,'dc-egg-piece-img',false);
+    const fallback=document.createElement('span');
+    fallback.className='dc-egg-piece-fallback';
+    fallback.textContent='✧';
+    fallback.hidden=true;
+    img.addEventListener('error',()=>{
+      img.remove(); fallback.hidden=false;
+      console.warn('Deadlock Cup: missing Easter egg image',img.src);
+    },{once:true});
+    btn.append(img,fallback);
+    btn.addEventListener('click',()=>open(item));
+    return btn;
+  }
+
+  function cluster(host, className){
+    const el=document.createElement('div');
+    el.className='dc-egg-cluster '+className;
+    host.append(el);
     return el;
   }
 
-  function makeOverlay() {
-    overlay=document.createElement('div');
-    overlay.className='dc-egg-backdrop';
-    overlay.id='dcEasterEggOverlay';
-    overlay.hidden=true;
-    overlay.addEventListener('pointerdown',ev=>{if(ev.target===overlay) close();});
-    panel=document.createElement('section');
-    panel.className='dc-egg-dialog';
-    panel.setAttribute('role','dialog');
-    panel.setAttribute('aria-modal','true');
-    panel.setAttribute('aria-labelledby','dcEasterEggTitle');
-    const closeBtn=document.createElement('button');
-    closeBtn.type='button';closeBtn.className='dc-egg-close';closeBtn.textContent='×';
-    closeBtn.setAttribute('aria-label','Закрыть найденную пасхалку');
-    closeBtn.addEventListener('click',close);
-    const eyebrow=document.createElement('div');eyebrow.className='dc-egg-eyebrow';
-    eyebrow.textContent='THE CURSED CITY / ОБНАРУЖЕН СЛЕД';
-    const stage=document.createElement('div');stage.className='dc-egg-art-stage';stage.id='dcEasterEggArtStage';
-    const logoContainer=document.createElement('div');logoContainer.id='dcEasterEggLogo';
-    const title=document.createElement('h2');title.id='dcEasterEggTitle';
-    const desc=document.createElement('p');desc.className='dc-egg-description';desc.id='dcEasterEggDescription';
-    const submarkContainer=document.createElement('div');submarkContainer.id='dcEasterEggSubmark';
-    const progress=document.createElement('div');progress.className='dc-egg-progress';progress.id='dcEasterEggProgress';
-    const footer=document.createElement('div');footer.className='dc-egg-footer';footer.textContent='Пасхалки — декоративная часть сайта. На турнир они не влияют.';
-    panel.append(closeBtn,eyebrow,stage,logoContainer,title,desc,submarkContainer,progress,footer);
-    overlay.append(panel);document.body.append(overlay);
-  }
-
-  function close() {
-    if (!overlay || overlay.hidden) return;
-    overlay.hidden=true;
-    document.body.classList.remove('dc-egg-modal-open');
-    document.removeEventListener('keydown',onModalKeydown);
-    if(lastFocus && lastFocus.isConnected) lastFocus.focus({preventScroll:true});
-  }
-
-  function open(item) {
-    if (!overlay) makeOverlay();
-    lastFocus=document.activeElement;
-    found.add(item.id);
-    try {localStorage.setItem(RECORD_KEY,JSON.stringify([...found]));} catch (_error) {}
-    panel.style.setProperty('--dc-egg-accent',item.accent);
-    const stage=document.getElementById('dcEasterEggArtStage');
-    const logo=document.getElementById('dcEasterEggLogo');
-    const submark=document.getElementById('dcEasterEggSubmark');
-    stage.replaceChildren(image(item.image,'dc-egg-art'+(item.id==='doorman'?' dc-egg-portrait':''),item.title));
-    logo.replaceChildren(...(item.logo && item.logo !== item.image ? [image(item.logo,'dc-egg-wordmark',item.title)] : []));
-    submark.replaceChildren(...(item.submark ? [image(item.submark,'dc-egg-submark','Символ фракции')] : []));
-    document.getElementById('dcEasterEggTitle').textContent=item.title;
-    document.getElementById('dcEasterEggDescription').textContent=item.message;
-    document.getElementById('dcEasterEggProgress').textContent=`НАЙДЕНО СЕКРЕТОВ: ${found.size} / ${archive.length}`;
-    overlay.hidden=false;document.body.classList.add('dc-egg-modal-open');
-    onModalKeydown=(event)=>{
-      if(event.key==='Escape'){event.preventDefault();close();}
-      if(event.key==='Tab'){
-        // The close button is the only interactive control inside the modal.
-        event.preventDefault(); panel.querySelector('.dc-egg-close').focus();
-      }
-    };
-    document.addEventListener('keydown',onModalKeydown);
-    panel.querySelector('.dc-egg-close').focus({preventScroll:true});
-  }
-
-  function place(item,slot) {
-    const host=document.querySelector(slot.selector);
-    if(!host) return;
-    const btn=document.createElement('button');
-    btn.type='button';btn.className='dc-egg-marker';
-    btn.setAttribute('aria-label','Найти скрытый знак');
-    btn.title='Странный знак. Нажми, чтобы исследовать.';
-    btn.dataset.eggId=item.id;
-    btn.style.setProperty('--dc-egg-tilt',`${rand(-12,12).toFixed(1)}deg`);
-    if(slot.kind==='intro'){
-      btn.style.left=rand(40,78).toFixed(1)+'%';
-      btn.style.top=rand(26,66).toFixed(1)+'%';
-    } else if(slot.kind==='quote'){
-      // Always in the right upper corner, away from the quote and its signature.
-      // Pixel-based positioning keeps the glyph inside narrow quote cards.
-      btn.classList.add('dc-egg-quote');
-      btn.style.right=rand(12,23).toFixed(0)+'px';
-      btn.style.top=rand(12,25).toFixed(0)+'px';
-    } else {
-      // The text occupies the left side of banners: keep symbols to the right.
-      btn.classList.add('dc-egg-banner');
-      btn.style.right=rand(21,57).toFixed(0)+'px';
-      btn.style.top=rand(32,63).toFixed(1)+'%';
+  function init(){
+    // Safeguard: never mount anything in the administrator section.
+    const intro=document.querySelector('#pageIntro .hero-right');
+    if(intro){
+      intro.classList.add('dc-egg-ready');
+      const c=cluster(intro,'dc-egg-intro-cluster');
+      ['intro-a','intro-b'].forEach(key=>c.append(marker(relics.find(r=>r.anchor===key))));
     }
-    if(item.id==='drifter') btn.classList.add('dc-egg-wide');
-    const icon=image(item.trigger,'','Скрытый знак');icon.alt='';icon.setAttribute('aria-hidden','true');
-    // A clearly visible glyph remains if PNG assets were uploaded to the wrong GitHub folder.
-    const fallback=document.createElement('span');fallback.className='dc-egg-fallback';fallback.textContent='✧';fallback.hidden=true;
-    icon.addEventListener('error',()=>{icon.hidden=true;fallback.hidden=false;},{once:true});
-    btn.append(icon,fallback);btn.addEventListener('click',()=>open(item));
-    host.append(btn);
-  }
-
-  function init() {
-    const available=slots.filter(s=>document.querySelector(s.selector));
-    if(!available.length) return;
-    // Every section has one marker, including the quote on the registration page.
-    // All five unique secrets remain discoverable in any session.
-    // Six slots means one random secret can appear in two different sections.
-    const ordered=shuffle(archive);
-    const assignments=shuffle([...ordered,ordered[Math.floor(Math.random()*ordered.length)]]);
-    available.forEach((slot,i)=>place(assignments[i % assignments.length],slot));
+    const quote=document.querySelector('#view-register .info-quote');
+    if(quote) cluster(quote,'dc-egg-quote-cluster').append(marker(relics.find(r=>r.anchor==='quote')));
+    const info=document.querySelector('#view-register .info-panel');
+    if(info) cluster(info,'dc-egg-info-trail').append(marker(relics.find(r=>r.anchor==='info')));
+    const teamHead=document.querySelector('#teamRegistration .panel-heading');
+    if(teamHead) cluster(teamHead,'dc-egg-team-seal').append(marker(relics.find(r=>r.anchor==='team')));
+    for(const area of ['roster','teams','bracket']){
+      const hero=document.querySelector(`#view-${area} .dc-view-hero`);
+      if(!hero) continue;
+      const c=cluster(hero,'dc-egg-banner-cluster');
+      relics.filter(r=>r.area===area).forEach(r=>c.append(marker(r)));
+    }
+    // Deliberately no #view-admin, no admin controls, and no changes to Supabase.
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true});
   else init();
