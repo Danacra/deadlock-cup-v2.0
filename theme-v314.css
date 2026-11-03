@@ -14,12 +14,6 @@
   --to-body: #d2dacd;
   --to-muted: #9ca995;
   --to-orbit: rgba(182,255,0,.25);
-  /* Five subtle, independently tinted orbital bands (center -> outside). */
-  --to-orbit-core: rgba(51, 80, 38, .14);
-  --to-orbit-inner: rgba(146, 179, 70, .21);
-  --to-orbit-middle: rgba(51, 119, 70, .21);
-  --to-orbit-outer: rgba(183, 151, 69, .20);
-  --to-orbit-edge: rgba(82, 132, 56, .16);
   --to-body-font: 'Manrope Cup', Manrope, 'Segoe UI', Arial, sans-serif;
   --to-display-font: 'Valve Occult Local', 'Deadlock Occult', Rajdhani, Impact, sans-serif;
 }
@@ -110,51 +104,15 @@ body { font-size: 13px; line-height: 1.65; }
   pointer-events: none;
   filter: drop-shadow(0 0 36px rgba(182,255,0,.07));
 }
-/* The circular regions between the orbit paths have separate tonal bands.
-   The transitions use ~1% ramps, avoiding hard concentric stripes. */
 .dc-orbit-wash {
-  position: absolute;
-  inset: -3%;
-  border-radius: 50%;
+  position: absolute; inset: -3%; border-radius: 50%;
   background:
-    radial-gradient(circle at center,
-      var(--to-orbit-core) 0%,
-      rgba(59, 86, 43, .14) 23.8%,
-      var(--to-orbit-inner) 25.2%,
-      rgba(146, 179, 70, .17) 32.2%,
-      var(--to-orbit-middle) 33.35%,
-      rgba(51, 119, 70, .16) 40.9%,
-      var(--to-orbit-outer) 42.15%,
-      rgba(183, 151, 69, .14) 49.5%,
-      var(--to-orbit-edge) 50.6%,
-      rgba(82, 132, 56, .06) 54%,
-      transparent 60%),
-    conic-gradient(from 38deg,
-      transparent 0deg,
-      rgba(182, 255, 0, .018) 80deg,
-      transparent 132deg,
-      rgba(240, 213, 143, .047) 221deg,
-      transparent 290deg);
+    radial-gradient(circle,rgba(182,255,0,.015) 0 18%,rgba(182,255,0,.055) 23%,transparent 30%,
+    rgba(199,167,83,.06) 34%,transparent 42%,rgba(182,255,0,.055) 47%,transparent 55%,
+    rgba(182,255,0,.025) 59%,transparent 70%),
+    conic-gradient(from 42deg,transparent 0deg,rgba(182,255,0,.025) 80deg,
+      transparent 128deg,rgba(239,213,138,.05) 216deg,transparent 290deg);
   animation: dc-orbit-breathe 6.5s ease-in-out infinite alternate;
-}
-/* Moving light is deliberately muted and clipped to the orbital bands. */
-.dc-orbit-wash::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: conic-gradient(from 90deg,
-    transparent 0deg,
-    rgba(211, 235, 132, .055) 56deg,
-    transparent 115deg,
-    rgba(206, 174, 94, .052) 226deg,
-    transparent 302deg);
-  -webkit-mask-image: radial-gradient(circle,
-    transparent 0 23.5%, #000 26% 48.8%, transparent 52%);
-  mask-image: radial-gradient(circle,
-    transparent 0 23.5%, #000 26% 48.8%, transparent 52%);
-  animation: dc-orbit-hue-drift 105s linear infinite;
-  pointer-events: none;
 }
 .hero-right .hero-monogram { display:none !important; }
 .dc-orbit-logo {
@@ -204,26 +162,10 @@ body { font-size: 13px; line-height: 1.65; }
   width: clamp(220px,26vw,320px);aspect-ratio:1;
   pointer-events:none;isolation:isolate;opacity:.94;
 }
-/* Matching graded rings on the banners of other site sections. */
-.dc-section-halo {
-  position: absolute;
-  inset: -8%;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at center,
-      rgba(48, 73, 35, .10) 0 23%,
-      rgba(147, 178, 73, .18) 25%,
-      rgba(147, 178, 73, .13) 34.5%,
-      rgba(56, 123, 76, .18) 36%,
-      rgba(56, 123, 76, .13) 45.3%,
-      rgba(186, 154, 80, .16) 47%,
-      rgba(186, 154, 80, .05) 53%,
-      transparent 60%),
-    conic-gradient(from 25deg, transparent 0deg,
-      rgba(197, 227, 109, .026) 95deg,
-      transparent 175deg, rgba(223, 183, 91, .03) 270deg,
-      transparent 350deg);
-  animation: dc-orbit-breathe 6s ease-in-out infinite alternate;
+.dc-section-halo {position:absolute;inset:-8%;border-radius:50%;background:
+  radial-gradient(circle,rgba(182,255,0,.025) 0 24%,rgba(182,255,0,.085) 32%,transparent 40%,
+    rgba(210,189,120,.055) 48%,transparent 59%,rgba(182,255,0,.035) 65%,transparent 75%);
+  animation:dc-orbit-breathe 6s ease-in-out infinite alternate;
 }
 .dc-mini-ring {position:absolute;display:block;left:50%;top:50%;aspect-ratio:1;border-radius:50%;}
 .dc-mini-ring::before{content:'';position:absolute;left:50%;top:-3px;width:5px;height:5px;border-radius:50%;background:#b6ff00;box-shadow:0 0 12px #b6ff0088;}
@@ -240,10 +182,6 @@ body { font-size: 13px; line-height: 1.65; }
 .dc-footer-brand>img {display:block;width:43px;height:46px;object-fit:contain;opacity:.66;}
 
 /* More movement, without floating UI over forms or affecting functionality. */
-@keyframes dc-orbit-hue-drift {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
-}
 @keyframes dc-to-spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 @keyframes dc-orbit-turn-a{from{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(360deg)}}
 @keyframes dc-orbit-turn-b{from{transform:translate(-50%,-50%) rotate(360deg)}to{transform:translate(-50%,-50%) rotate(0)}}
@@ -294,7 +232,7 @@ body { font-size: 13px; line-height: 1.65; }
 }
 @media(prefers-reduced-motion:reduce){
   .dc-brand-mark::before,.hero-right .hero-ring,.dc-orbit-wash,.dc-orbit-logo,
-  .dc-orbit-compass,.dc-orbit-wash::after,.dc-section-halo,.dc-mini-ring,.dc-section-art>img,
+  .dc-orbit-compass,.dc-section-halo,.dc-mini-ring,.dc-section-art>img,
   .hero-left h1,.hero-left .eyebrow,.hero-left>p,.hero-actions,
   .dc-appear,.view:not([hidden]) > .dc-view-hero .section-heading,
   .view:not([hidden]) > .dc-view-hero .section-kicker{animation:none!important;}
