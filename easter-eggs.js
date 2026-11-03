@@ -1,20 +1,20 @@
-/* Deadlock Cup v3.12 — all 11 supplied artworks, public views only. */
+/* Deadlock Cup v3.13 — 11 easter eggs scattered across public sections, never admin. */
 (() => {
   'use strict';
   const ASSETS = './easter-eggs/';
-  const STORAGE = 'deadlock_cup_artifacts_v312';
+  const STORAGE = 'deadlock_cup_artifacts_v312'; // Keep prior discovery history across updates.
   const relics = [
-    {id:'archmother-mask',file:'archmother-mask.png',title:'Архиматерь',label:'Лик Архиматери',detail:'Узнаваемый силуэт в отблеске холодного света.',size:'mask',anchor:'intro-a',area:'intro'},
-    {id:'hidden-king-mask',file:'hidden-king-mask.png',title:'Скрытый король',label:'Взгляд из тьмы',detail:'Иногда самое важное скрывается за маской.',size:'mask',anchor:'intro-b',area:'intro'},
+    {id:'archmother-mask',file:'archmother-mask.png',title:'Архиматерь',label:'Лик Архиматери',detail:'Узнаваемый силуэт в отблеске холодного света.',size:'mask',anchor:'intro',area:'intro'},
+    {id:'hidden-king-mask',file:'hidden-king-mask.png',title:'Скрытый король',label:'Взгляд из тьмы',detail:'Иногда самое важное скрывается за маской.',size:'mask',anchor:'footer',area:'footer'},
     {id:'archmother-sigil',file:'archmother-sigil.png',title:'Архиматерь',label:'Знак Архиматери',detail:'Маленькая метка на полях объявления.',size:'sigil',anchor:'quote',area:'quote'},
-    {id:'guided-hand',file:'guided-hand.png',title:'Направляющая длань',label:'The Guided Hand',detail:'Кому-то здесь явно нравится оставлять подписи.',size:'wordmark',anchor:'info',area:'info'},
-    {id:'archmother-name',file:'archmother-name.png',title:'Архиматерь',label:'ARCHMOTHER',detail:'Тайное имя среди турнирных анкет.',size:'wordmark',anchor:'team',area:'team'},
-    {id:'hidden-king-sigil',file:'hidden-king-sigil.png',title:'Скрытый король',label:'Тайный знак',detail:'Никто не заметит его, если не присмотреться.',size:'sigil',anchor:'roster-a',area:'roster'},
-    {id:'hidden-king-name',file:'hidden-king-name.png',title:'Скрытый король',label:'HIDDEN KING',detail:'Имя осталось там, где его меньше всего ждут.',size:'wordmark',anchor:'roster-b',area:'roster'},
-    {id:'broken-crown',file:'broken-crown.png',title:'Сломанная корона',label:'The Broken Crown',detail:'Короны ломаются, но легенды остаются.',size:'wordmark',anchor:'teams-a',area:'teams'},
-    {id:'patron',file:'patron.png',title:'Покровитель',label:'Нечто в тени',detail:'Кто знает, кто наблюдает за составами команд?',size:'mask',anchor:'teams-b',area:'teams'},
-    {id:'doorman',file:'doorman.png',title:'Привратник',label:'Знак Привратника',detail:'Не всякая дверь ведёт туда, куда ожидаешь.',size:'portrait',anchor:'bracket-a',area:'bracket'},
-    {id:'drifter-name',file:'drifter-name.png',title:'Скиталец',label:'DRIFTER',detail:'Призрачная надпись среди будущих матчей.',size:'wordmark',anchor:'bracket-b',area:'bracket'}
+    {id:'guided-hand',file:'guided-hand.png',title:'Направляющая длань',label:'The Guided Hand',detail:'Кому-то здесь явно нравится оставлять подписи.',size:'wordmark',anchor:'solo-bottom',area:'solo'},
+    {id:'archmother-name',file:'archmother-name.png',title:'Архиматерь',label:'ARCHMOTHER',detail:'Тайное имя среди турнирных анкет.',size:'wordmark',anchor:'team-bottom',area:'team'},
+    {id:'hidden-king-sigil',file:'hidden-king-sigil.png',title:'Скрытый король',label:'Тайный знак',detail:'Никто не заметит его, если не присмотреться.',size:'sigil',anchor:'roster-upper',area:'roster'},
+    {id:'hidden-king-name',file:'hidden-king-name.png',title:'Скрытый король',label:'HIDDEN KING',detail:'Имя осталось там, где его меньше всего ждут.',size:'wordmark',anchor:'roster-lower',area:'roster'},
+    {id:'broken-crown',file:'broken-crown.png',title:'Сломанная корона',label:'The Broken Crown',detail:'Короны ломаются, но легенды остаются.',size:'wordmark',anchor:'teams-upper',area:'teams'},
+    {id:'patron',file:'patron.png',title:'Покровитель',label:'Нечто в тени',detail:'Кто знает, кто наблюдает за составами команд?',size:'mask',anchor:'teams-lower',area:'teams'},
+    {id:'doorman',file:'doorman.png',title:'Привратник',label:'Знак Привратника',detail:'Не всякая дверь ведёт туда, куда ожидаешь.',size:'portrait',anchor:'bracket-upper',area:'bracket'},
+    {id:'drifter-name',file:'drifter-name.png',title:'Скиталец',label:'DRIFTER',detail:'Призрачная надпись среди будущих матчей.',size:'wordmark',anchor:'bracket-lower',area:'bracket'}
   ];
   let discovered = new Set();
   try {
@@ -31,7 +31,7 @@
     img.src = ASSETS + item.file;
     img.className = className;
     img.alt = extra ? item.label : '';
-    img.loading = extra ? 'eager' : 'lazy';
+    img.loading = 'eager';
     img.decoding = 'async';
     img.referrerPolicy = 'same-origin';
     return img;
@@ -111,9 +111,9 @@
     btn.dataset.relic=item.id;
     btn.title=item.label+' — исследовать';
     btn.setAttribute('aria-label','Найти артефакт: '+item.label);
-    btn.style.setProperty('--egg-rotation',random(-9,9).toFixed(1)+'deg');
-    btn.style.setProperty('--egg-jitter-x',random(-5,5).toFixed(0)+'px');
-    btn.style.setProperty('--egg-jitter-y',random(-5,5).toFixed(0)+'px');
+    btn.style.setProperty('--egg-rotation',random(-7,7).toFixed(1)+'deg');
+    btn.style.setProperty('--egg-jitter-x',random(-12,12).toFixed(0)+'px');
+    btn.style.setProperty('--egg-jitter-y',random(-4,4).toFixed(0)+'px');
     const img=imageFor(item,'dc-egg-piece-img',false);
     const fallback=document.createElement('span');
     fallback.className='dc-egg-piece-fallback';
@@ -128,34 +128,85 @@
     return btn;
   }
 
-  function cluster(host, className){
-    const el=document.createElement('div');
-    el.className='dc-egg-cluster '+className;
-    host.append(el);
-    return el;
+  function placeAfter(target, item, spot, alignment='left') {
+    if (!target || !item) return;
+    const lane=document.createElement('div');
+    lane.className='dc-egg-trail dc-egg-trail--'+spot+' dc-egg-align-'+alignment;
+    lane.dataset.eggSpot=spot;
+    lane.append(marker(item));
+    target.insertAdjacentElement('afterend',lane);
+    return lane;
   }
-
+  function placeBefore(target,item,spot,alignment='left'){
+    if(!target || !item) return;
+    const lane=document.createElement('div');
+    lane.className='dc-egg-trail dc-egg-trail--'+spot+' dc-egg-align-'+alignment;
+    lane.dataset.eggSpot=spot;
+    lane.append(marker(item));
+    target.insertAdjacentElement('beforebegin',lane);
+    return lane;
+  }
+  function placeInside(host,item,spot,alignment='right'){
+    if(!host || !item) return;
+    const lane=document.createElement('div');
+    lane.className='dc-egg-trail dc-egg-trail--'+spot+' dc-egg-align-'+alignment;
+    lane.dataset.eggSpot=spot;
+    lane.append(marker(item));
+    host.append(lane);
+    return lane;
+  }
   function init(){
-    // Safeguard: never mount anything in the administrator section.
-    const intro=document.querySelector('#pageIntro .hero-right');
-    if(intro){
-      intro.classList.add('dc-egg-ready');
-      const c=cluster(intro,'dc-egg-intro-cluster');
-      ['intro-a','intro-b'].forEach(key=>c.append(marker(relics.find(r=>r.anchor===key))));
+    const relic=(id)=>relics.find(r=>r.id===id);
+
+    // Hero art: exactly ONE piece, not a cluster of portraits.
+    const heroRight=document.querySelector('#pageIntro .hero-right');
+    if(heroRight){
+      const host=document.createElement('div');
+      host.className='dc-egg-intro-corner';
+      host.dataset.eggSpot='intro';
+      host.append(marker(relic('archmother-mask')));
+      heroRight.append(host);
     }
-    const quote=document.querySelector('#view-register .info-quote');
-    if(quote) cluster(quote,'dc-egg-quote-cluster').append(marker(relics.find(r=>r.anchor==='quote')));
-    const info=document.querySelector('#view-register .info-panel');
-    if(info) cluster(info,'dc-egg-info-trail').append(marker(relics.find(r=>r.anchor==='info')));
-    const teamHead=document.querySelector('#teamRegistration .panel-heading');
-    if(teamHead) cluster(teamHead,'dc-egg-team-seal').append(marker(relics.find(r=>r.anchor==='team')));
-    for(const area of ['roster','teams','bracket']){
-      const hero=document.querySelector(`#view-${area} .dc-view-hero`);
-      if(!hero) continue;
-      const c=cluster(hero,'dc-egg-banner-cluster');
-      relics.filter(r=>r.area===area).forEach(r=>c.append(marker(r)));
+
+    // Registration: one piece in the quote, the other at the very bottom of the long form.
+    const quote=document.querySelector('#view-register #soloRegistration .info-quote');
+    if(quote){
+      const seal=document.createElement('div');
+      seal.className='dc-egg-quote-stamp';
+      seal.dataset.eggSpot='quote';
+      seal.append(marker(relic('archmother-sigil')));
+      quote.append(seal);
     }
-    // Deliberately no #view-admin, no admin controls, and no changes to Supabase.
+    placeInside(document.querySelector('#registerForm'),relic('guided-hand'),'solo-bottom','right');
+
+    // Team registration: below the submit form, not on its heading or the inputs.
+    placeInside(document.querySelector('#teamRegistration'),relic('archmother-name'),'team-bottom','left');
+
+    // Player list: one near the beginning, another below the entire panel.
+    const rosterHead=document.querySelector('#view-roster .roster-head');
+    placeAfter(rosterHead,relic('hidden-king-sigil'),'roster-upper','right');
+    placeAfter(document.querySelector('#view-roster .roster-panel'),relic('hidden-king-name'),'roster-lower','left');
+
+    // Teams: separate margins BEFORE and AFTER the roster cards.
+    const teamsGrid=byId('teamsPublicGrid');
+    placeBefore(teamsGrid,relic('broken-crown'),'teams-upper','right');
+    placeAfter(teamsGrid,relic('patron'),'teams-lower','left');
+
+    // Bracket: one mark before the grid, and another all the way below it.
+    const bracket=byId('bracketPublic');
+    placeBefore(bracket,relic('doorman'),'bracket-upper','left');
+    placeAfter(bracket,relic('drifter-name'),'bracket-lower','right');
+
+    // Footer: independent bottom-of-page artifact, strictly hidden in Organiser view.
+    const footer=document.querySelector('footer.footer');
+    const footerSlot=placeInside(footer,relic('hidden-king-mask'),'footer','right');
+    const admin=byId('view-admin');
+    if(footerSlot && admin){
+      const syncFooter=()=>{ footerSlot.hidden=!admin.hidden; };
+      new MutationObserver(syncFooter).observe(admin,{attributes:true,attributeFilter:['hidden']});
+      syncFooter();
+    }
+    // No art elements are ever added inside #view-admin, including dynamic editor content.
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true});
   else init();

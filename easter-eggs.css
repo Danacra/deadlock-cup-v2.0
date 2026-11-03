@@ -1,89 +1,99 @@
-/* Deadlock Cup v3.12 — eleven transparent PNG fragments, public screens only. */
-#pageIntro .hero-right,
-#view-register .info-quote,
-#view-register .info-panel,
-#teamRegistration .panel-heading,
-#view-roster .dc-view-hero,
-#view-teams .dc-view-hero,
-#view-bracket .dc-view-hero{position:relative}
-
-.dc-egg-cluster{pointer-events:none;isolation:isolate;z-index:4}
+/* Deadlock Cup v3.13: true scattered artifacts across long public views. */
+:root{--egg-neon:#b6ff00}
 .dc-egg-piece{
   --egg-rotation:0deg;--egg-jitter-x:0px;--egg-jitter-y:0px;
-  position:relative;z-index:1;appearance:none;border:0;padding:0;
-  width:72px;height:72px;display:grid;place-items:center;
-  background:none;color:#b6ff00;cursor:pointer;pointer-events:auto;
-  opacity:.75;filter:drop-shadow(0 2px 4px #0009) drop-shadow(0 0 8px #b6ff0019);
+  position:relative;z-index:2;appearance:none;border:0;padding:0;
+  width:76px;height:76px;display:grid;place-items:center;
+  background:transparent;color:var(--egg-neon);cursor:pointer;
+  opacity:.77;filter:drop-shadow(0 3px 6px #000a) drop-shadow(0 0 8px #b6ff0022);
   transform:translate(var(--egg-jitter-x),var(--egg-jitter-y)) rotate(var(--egg-rotation));
-  transition:opacity .22s, filter .22s, transform .22s;
+  transition:opacity .2s, filter .2s, transform .2s;
   -webkit-tap-highlight-color:transparent;
 }
 .dc-egg-piece:hover,.dc-egg-piece:focus-visible{
-  opacity:1;filter:drop-shadow(0 3px 9px #000e) drop-shadow(0 0 14px #b6ff0069);
-  transform:translate(var(--egg-jitter-x),var(--egg-jitter-y)) rotate(0deg) scale(1.13);
+  opacity:1;filter:drop-shadow(0 4px 12px #000) drop-shadow(0 0 14px #b6ff0060);
+  transform:translate(var(--egg-jitter-x),var(--egg-jitter-y)) rotate(0) scale(1.11);
 }
-.dc-egg-piece:focus-visible{outline:2px dashed #b6ff00;outline-offset:4px}
-.dc-egg-piece-img{display:block;max-width:100%;max-height:100%;width:100%;height:100%;object-fit:contain;pointer-events:none;user-select:none;-webkit-user-drag:none}
-.dc-egg-piece-fallback{font:900 34px/1 Manrope,Arial,sans-serif;color:#b6ff00;filter:drop-shadow(0 0 8px #b6ff0070)}
+.dc-egg-piece:focus-visible{outline:2px dashed var(--egg-neon);outline-offset:3px}
+.dc-egg-piece-img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none;user-select:none;-webkit-user-drag:none}
+.dc-egg-piece-fallback{font:900 34px/1 Manrope,Arial,sans-serif;color:var(--egg-neon)}
 .dc-egg-piece-fallback[hidden]{display:none!important}
-.dc-egg-wordmark{width:170px;height:63px;opacity:.66}
-.dc-egg-sigil{width:46px;height:46px;opacity:.78}
-.dc-egg-portrait{width:73px;height:89px}
-.dc-egg-mask{width:81px;height:81px}
+.dc-egg-piece.dc-egg-mask{width:94px;height:94px}
+.dc-egg-piece.dc-egg-portrait{width:78px;height:93px}
+.dc-egg-piece.dc-egg-sigil{width:48px;height:48px}
+.dc-egg-piece.dc-egg-wordmark{width:clamp(145px,19vw,225px);height:76px}
 
-/* Two larger faces float around the D// rings, never above the registration form. */
-.dc-egg-intro-cluster{position:absolute;inset:0;z-index:8}
-.dc-egg-intro-cluster .dc-egg-piece{position:absolute}
-.dc-egg-intro-a{top:16%;left:14%}
-.dc-egg-intro-b{right:12%;bottom:18%;background:radial-gradient(circle,#b6ff0015,transparent 72%)}
-
-/* A thin symbol is hidden in the quote's top right; a second image sits under the info box. */
-.dc-egg-quote-cluster{position:absolute;right:13px;top:10px;z-index:7}
-.dc-egg-quote-cluster .dc-egg-piece{width:44px;height:44px}
-.dc-egg-info-trail{display:flex;justify-content:flex-end;align-items:center;
-  min-height:44px;margin-top:18px;padding-top:10px;border-top:1px dashed #b6ff002e}
-.dc-egg-info-trail .dc-egg-piece{width:176px;height:31px;opacity:.53}
-.dc-egg-info-trail .dc-egg-piece:hover{opacity:1}
-/* A wordmark hides within the spacious heading of the team application, away from inputs. */
-.dc-egg-team-seal{position:relative;margin-left:auto;min-width:132px;display:flex;align-items:center;justify-content:flex-end}
-.dc-egg-team-seal .dc-egg-piece{width:160px;height:49px;opacity:.55}
-.dc-egg-team-seal .dc-egg-piece:hover{opacity:1}
-#teamRegistration .panel-heading{flex-wrap:wrap}
-
-/* Two independent artefacts in the empty right side of each public page banner. */
-.dc-egg-banner-cluster{
-  position:absolute;right:20px;top:12px;width:min(32%,305px);
-  height:calc(100% - 24px);z-index:3;
+/* Dedicated margins beside and BETWEEN public content, never on forms/roster text. */
+.dc-egg-trail{
+  isolation:isolate;position:relative;z-index:1;box-sizing:border-box;
+  width:100%;max-width:100%;min-height:100px;
+  margin:12px 0 17px;padding:12px clamp(20px,5vw,68px);
+  display:flex;align-items:center;overflow:visible;
+  background:radial-gradient(ellipse at 83% 50%,#b6ff0009 0,transparent 62%);
 }
-.dc-egg-banner-cluster .dc-egg-piece{position:absolute}
-.dc-egg-roster-a{right:6px;top:5px}
-.dc-egg-roster-b{left:3px;bottom:7px}
-.dc-egg-teams-a{left:1px;top:8px;width:190px;height:64px}
-.dc-egg-teams-b{right:3px;bottom:8px;width:74px;height:74px}
-.dc-egg-bracket-a{left:15px;top:3px}
-.dc-egg-bracket-b{right:0;bottom:6px;width:184px;height:61px}
+.dc-egg-trail::before{content:'';pointer-events:none;position:absolute;left:3%;right:3%;top:50%;height:1px;
+ background:linear-gradient(90deg,transparent,#b6ff002d 36%,#b6ff0019 63%,transparent)}
+.dc-egg-trail .dc-egg-piece{flex:none}
+.dc-egg-align-left{justify-content:flex-start}
+.dc-egg-align-right{justify-content:flex-end}
+.dc-egg-align-center{justify-content:center}
+.dc-egg-trail--solo-bottom{min-height:94px;margin-top:25px;padding-right:24px}
+.dc-egg-trail--team-bottom{border-top:1px solid #b6ff0017;margin:14px 0 0}
+.dc-egg-trail--roster-upper{min-height:66px;margin:0 0 13px;padding-block:4px}
+.dc-egg-trail--roster-upper .dc-egg-piece{width:54px;height:54px}
+.dc-egg-trail--roster-lower{margin-top:18px}
+.dc-egg-trail--teams-upper{min-height:86px;margin-top:20px;margin-bottom:4px}
+.dc-egg-trail--teams-lower{min-height:135px;margin-top:22px}
+.dc-egg-trail--teams-lower .dc-egg-piece{width:105px;height:105px}
+.dc-egg-trail--bracket-upper{min-height:100px;margin-top:22px}
+.dc-egg-trail--bracket-lower{margin-top:26px;min-height:120px}
 
-/* At narrower widths, artwork has its own row: no collision with heading text. */
-@media(max-width:1000px){
-  .dc-egg-banner-cluster{
-    position:relative;right:auto;top:auto;width:100%;height:93px;
-    margin-top:16px;border-top:1px dashed #b6ff0023;
-  }
-  .dc-egg-banner-cluster .dc-egg-piece{top:9px;bottom:auto}
-  .dc-egg-banner-cluster .dc-egg-piece:nth-child(1){left:4%;right:auto}
-  .dc-egg-banner-cluster .dc-egg-piece:nth-child(2){left:auto;right:5%}
-  .dc-egg-banner-cluster .dc-egg-piece.dc-egg-wordmark{width:180px}
+/* A tiny emblem is tucked onto the quote's frame, without covering its text. */
+#view-register #soloRegistration .info-quote{position:relative}
+.dc-egg-quote-stamp{position:absolute;top:10px;right:10px;z-index:3;pointer-events:none}
+.dc-egg-quote-stamp .dc-egg-piece{width:42px;height:42px;pointer-events:auto}
+
+/* One face inhabits the introductory decorative circle (not every banner). */
+#pageIntro .hero-right{position:relative}
+.dc-egg-intro-corner{position:absolute;right:12%;bottom:10%;z-index:8;pointer-events:none}
+.dc-egg-intro-corner .dc-egg-piece{pointer-events:auto}
+
+/* Last secret is a small emblem by the BOTTOM of the site, below footer copy. */
+.footer{position:relative}
+.dc-egg-trail--footer{width:min(100% - 40px,1180px);min-height:93px;margin:0 auto;padding:3px 55px 14px;
+ border-top:1px dashed #b6ff0022;background:transparent}
+.dc-egg-trail--footer .dc-egg-piece{width:77px;height:77px;opacity:.63}
+.dc-egg-trail--footer[hidden]{display:none!important}
+
+/* Do not bring hidden screens into view, and never show a footer secret in admin. */
+#view-register[hidden] .dc-egg-trail,
+#view-roster[hidden] .dc-egg-trail,
+#view-teams[hidden] .dc-egg-trail,
+#view-bracket[hidden] .dc-egg-trail,
+#soloRegistration[hidden] .dc-egg-trail,
+#teamRegistration[hidden] .dc-egg-trail{display:none!important}
+body:has(#view-admin:not([hidden])) .dc-egg-trail--footer{display:none!important}
+
+@media(max-width:830px){
+  .dc-egg-trail{min-height:82px;margin-top:8px;margin-bottom:12px;padding-inline:26px}
+  .dc-egg-trail--teams-lower{min-height:106px}
+  .dc-egg-trail--footer{min-height:80px}
+  #pageIntro .hero-right{position:absolute}
+  .dc-egg-intro-corner{right:9%;bottom:10%}
 }
 @media(max-width:580px){
-  #pageIntro .hero-right.dc-egg-ready{opacity:1}
-  #pageIntro .hero-right.dc-egg-ready .hero-monogram,
-  #pageIntro .hero-right.dc-egg-ready .hero-ring,
-  #pageIntro .hero-right.dc-egg-ready .hero-serial{opacity:.27}
-  #view-register .info-quote{display:block!important;min-height:200px}
-  .dc-egg-banner-cluster .dc-egg-piece.dc-egg-wordmark{width:142px;height:65px}
-  .dc-egg-mask{width:68px;height:68px}
-  .dc-egg-team-seal{width:100%;justify-content:flex-end}
+  .dc-egg-piece.dc-egg-wordmark{width:150px;height:65px}
+  .dc-egg-piece.dc-egg-mask{width:70px;height:70px}
+  .dc-egg-piece.dc-egg-portrait{width:66px;height:78px}
+  .dc-egg-trail--footer{width:calc(100% - 28px);padding-right:24px}
+  #view-register #soloRegistration .info-quote{display:block!important;min-height:205px}
+  .dc-egg-quote-stamp{top:6px;right:6px}
+  #pageIntro .hero-right .hero-monogram,
+  #pageIntro .hero-right .hero-ring{opacity:.30}
+  #pageIntro .hero-right{pointer-events:none}
+  .dc-egg-intro-corner{right:6%;bottom:7%}
 }
+@media(prefers-reduced-motion:reduce){.dc-egg-piece{transition:none!important}}
 
 /* Image-first discoverable modal. No missing-image browser glyphs. */
 .dc-egg-backdrop[hidden]{display:none!important}
