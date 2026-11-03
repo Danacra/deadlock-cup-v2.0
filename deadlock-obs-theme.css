@@ -1,0 +1,16 @@
+/* Same color family as the v3.1 public website, transparent for OBS. */
+:root{--lime:#d8af78;--dc-crimson:#b85655;--dc-paper:#f0e5d2}
+.scorebug{background:#12212cec;border-color:#d8af78;color:var(--dc-paper)}
+.scorebug::before{background:#b85655}.scorebug::after{background:linear-gradient(90deg,transparent,#d8af7825,transparent)}
+.score-center{background:#ad5553;color:#fff0dc}
+.score-name span{color:#f0e5d2}.score-name small{color:#d0b79b}
+.round{background:#14232bea;color:#edc68b;border-top:2px solid #b85655}
+.roster-overlay{background:#14232bec;border-color:#aa695a}
+.roster-header{border-bottom-color:#aa695a}.roster-header small{color:#e4b980}
+.roster-overgrid .item{background:#263a46;border-left-color:#b85655;color:#f0e5d2}
+.roster-overgrid .item small{color:#d1b08b}
+.lowerthird{background:#14232bea;border-left-color:#b85655;border-bottom-color:#d8af78}
+.lowerthird .tag,.lowerthird .names b{color:#e4b980}
+.lowerthird .roundname{color:#e1c9a5}
+.overlay-demo{background:#bb5752;color:#fff4e8}
+.offline-msg{background:#172a31;color:#f2ca98}

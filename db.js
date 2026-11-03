@@ -76,7 +76,7 @@ export const safeImage = (url) => {
     const p = new URL(url);
     return p.protocol === 'https:' && [
       'assets.deadlock-api.com', 'assets-bucket.deadlock-api.com',
-      'media.githubusercontent.com', 'raw.githubusercontent.com', 'deadlock.wiki', 'deadlock.io'
+      'media.githubusercontent.com', 'raw.githubusercontent.com', 'deadlock.wiki'
     ].includes(p.hostname) ? p.href : '';
   } catch { return ''; }
 };
@@ -98,7 +98,7 @@ const wikiCardUrl = (name) =>
 // случайное изображение другого героя.
 export function heroImageSources(hero) {
   if (!hero?.name) return [];
-  const urls = [hero.image, ...(hero.imageAlternates || []), wikiCardUrl(hero.name), portraitFromSlug(hero.name), assetCardUrl(hero.name)];
+  const urls = [hero.image, ...(hero.imageAlternates || []), assetCardUrl(hero.name), wikiCardUrl(hero.name), portraitFromSlug(hero.name)];
   return [...new Set(urls.map(safeImage).filter(Boolean))];
 }
 // Все 44 играбельных героя на 02.11.2026. Каталог доступен без API.
@@ -112,69 +112,12 @@ export const FALLBACK_HEROES = [
   'Paradox', 'Pocket', 'Rat King', 'Rem', 'Seven', 'Shiv', 'Silver',
   'Sinclair', 'Solomon', 'The Doorman', 'Venator', 'Victor',
   'Vindicta', 'Viscous', 'Violet', 'Vyper', 'Warden', 'Wraith', 'Yamato'
-].map((name) => ({ name, image: wikiCardUrl(name) || portraitFromSlug(name) }));
+].map((name) => ({ name, image: assetCardUrl(name), imageAlternates: [wikiCardUrl(name),portraitFromSlug(name)] }));
 
 const heroKey = name => String(name).toLowerCase()
   .replace(/\b(and)\b/g, '&').replace(/[^a-z0-9а-яё]+/g, '');
 
 // Объединяем резервный список с данными API; API имеет приоритет для картинок.
-
-const localized = (field, lang='russian') => field?.byLanguage?.[lang] || field?.byLanguage?.english || field?.english || '';
-const deadlockAsset = (publicPath) => publicPath ? safeImage(`https://deadlock.io${publicPath}`) : '';
-// Treat external game data as plain text; no external HTML is inserted into the page.
-// Only our own <br> tags are created after escaping the source content.
-const cleanDeadlockMarkup = (html = '', maxLength = 0) => {
-  const plain = String(html || '')
-    .replace(/\{(?:g|s):[^}]+\}/g, '')
-    .replace(/<br\s*\/?\s*>/gi, '\n')
-    .replace(/<[^>]*>/g, '')
-    .replace(/\r/g, '')
-    .replace(/\n{3,}/g, '\n\n')
-    .replace(/ +/g, ' ')
-    .trim();
-  const short = maxLength && plain.length > maxLength ? plain.slice(0, maxLength).trimEnd() + '…' : plain;
-  return escapeHTML(short).replace(/\n/g, '<br>');
-};
-
-export async function loadHeroCompendium() {
-  let cached = {};
-  try { cached = JSON.parse(localStorage.getItem('deadlock_hero_compendium_v1') || '{}'); }
-  catch { cached = {}; }
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 5500);
-  try {
-    const response = await fetch('https://deadlock.io/api/v1/heroes.json', {signal: controller.signal});
-    if (!response.ok) throw new Error(`Deadlock.io вернул HTTP ${response.status}`);
-    const payload = await response.json();
-    const heroes = Array.isArray(payload?.heroes) ? payload.heroes : [];
-    const processed = Object.fromEntries(heroes.map(hero => {
-      const name = localized(hero.displayName,'english') || hero.id || hero.slug || '';
-      const abilities = Array.isArray(hero.abilities) ? hero.abilities
-        .filter(a => String(a.slot || '').startsWith('ESlot_Signature_'))
-        .sort((a,b) => String(a.slot).localeCompare(String(b.slot)))
-        .map((a,idx) => ({
-          slot: idx + 1,
-          name: localized(a.displayName),
-          description: cleanDeadlockMarkup(localized(a.description), 330),
-          icon: deadlockAsset(a.assets?.icon?.publicPath)
-        })) : [];
-      return [name.toLowerCase(), {
-        name,
-        playstyle: cleanDeadlockMarkup(localized(hero.playstyle), 350),
-        lore: cleanDeadlockMarkup(localized(hero.lore), 750),
-        descriptionSource: 'deadlock.io',
-        portrait: deadlockAsset(hero.assets?.selectionImage?.publicPath) || deadlockAsset(hero.assets?.iconHeroCard?.publicPath) || deadlockAsset(hero.assets?.iconHeroPortrait?.publicPath) || '',
-        abilities
-      }];
-    }).filter(([name]) => !!name));
-    try { localStorage.setItem('deadlock_hero_compendium_v1', JSON.stringify(processed)); } catch {}
-    return {compendium: processed, online: true, error: null};
-  } catch (error) {
-    return {compendium: (cached && typeof cached === 'object') ? cached : {}, online: false, error: error?.name === 'AbortError' ? 'Сервер не ответил вовремя (8,5 с).' : 'Сервер справочника недоступен или блокирует запрос.'};
-  } finally {
-    clearTimeout(timeout);
-  }
-}
 
 export function mergeHeroes(apiHeroes = []) {
   const combined = new Map(FALLBACK_HEROES.map(hero => [heroKey(hero.name), hero]));
@@ -197,7 +140,7 @@ export function mergeHeroes(apiHeroes = []) {
 export async function loadHeroes() {
   // Портреты из последнего успешного ответа доступны и при временном сбое API.
   let cached = [];
-  try { cached = JSON.parse(localStorage.getItem('deadlock_heroes_cache_v3') || '[]'); }
+  try { cached = JSON.parse(localStorage.getItem('deadlock_heroes_cache_v31') || '[]'); }
   catch { /* Нет сохранённого каталога */ }
   if (!Array.isArray(cached)) cached = [];
   const cachedList = cached.filter(h => h && typeof h.name === 'string' && typeof h.image === 'string');
@@ -221,7 +164,7 @@ export async function loadHeroes() {
       }));
     if (heroes.length < 10) throw new Error('Deadlock API вернул неполный каталог');
     const merged = mergeHeroes(heroes);
-    try { localStorage.setItem('deadlock_heroes_cache_v3', JSON.stringify(heroes)); }
+    try { localStorage.setItem('deadlock_heroes_cache_v31', JSON.stringify(heroes)); }
     catch { /* Блокировка localStorage не должна ломать каталог */ }
     return {heroes: merged, online: true};
   } catch {

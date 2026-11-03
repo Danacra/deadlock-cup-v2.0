@@ -1,5 +1,6 @@
-import { db, configured, initializeDatabase, demo, loadHeroes, loadHeroCompendium, FALLBACK_HEROES, escapeHTML as esc, heroImageSources } from './db.js';
+import { db, configured, initializeDatabase, demo, loadHeroes, FALLBACK_HEROES, escapeHTML as esc, heroImageSources } from './db.js';
 import { createTournamentController } from './tournament.js';
+import {loadHeroProfile, fallbackProfile, heroReferenceUrl} from './hero-profile.js';
 const $ = (id) => document.getElementById(id);
 const state = { view: 'register', heroes: [], selected: [], roster: [], registrations: [], broadcast: null, isAdmin: false, adminStatus: 'all', heroFocus: '', heroCompendium: {}, heroCompendiumOnline: false, heroCompendiumLoading: false, heroCompendiumError: '' };
 const tournament = createTournamentController({isAdmin:()=>state.isAdmin,getRegistrations:()=>state.registrations});
@@ -62,6 +63,7 @@ function setHeroFocus(name) {
   const next = name || state.selected[0] || '';
   if (state.heroFocus === next) return;
   state.heroFocus = next;
+  if (next && !state.heroCompendium[heroKey(next)]) state.heroCompendium[heroKey(next)] = fallbackProfile(next);
   renderHeroDossier();
   window.dispatchEvent(new CustomEvent('deadlock:focus-hero', {detail: {name: next}}));
 }
@@ -69,31 +71,29 @@ function renderHeroDossier() {
   const name = state.heroFocus || state.selected[0] || '';
   const details = getHeroDetails(name);
   $('heroSpotlightName').textContent = name || 'ВЫБЕРИ ГЕРОЯ';
-  $('heroSpotlightTag').textContent = details ? 'OFFICIAL GAME DATA' : 'LORE / SKILLS';
+  $('heroSpotlightTag').textContent = details ? 'CITY ARCHIVE' : 'HERO INTEL';
   $('heroSpotlightPortrait').innerHTML = name ? heroPortraitHTML(name) : '<span>D//</span>';
   const playstyle = details?.playstyle || (name ? 'Описание загружается отдельно по кнопке. Выбрать героя можно без подключения к справочнику.' : 'Нажми на героя в каталоге, чтобы открыть его досье.');
   const lore = details?.lore || (name ? 'Нажми «Загрузить описание». Если источник недоступен, открой справочник в новой вкладке.' : 'Предыстория и способности не влияют на регистрацию.');
-  $('heroSpotlightPlaystyle').innerHTML = playstyle;
-  $('heroSpotlightLore').innerHTML = lore;
+  $('heroSpotlightPlaystyle').textContent = playstyle;
+  $('heroSpotlightLore').textContent = lore;
   const abilities = details?.abilities || [];
   const loading = state.heroCompendiumLoading;
   const error = !!state.heroCompendiumError;
   $('heroAbilityList').innerHTML = abilities.length
-    ? abilities.map(a => `<article class="dc-ability-card"><div class="dc-ability-icon">${a.icon ? `<img src="${esc(a.icon)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<span>${esc(String(a.slot))}</span>`}</div><div class="dc-ability-copy"><div class="dc-ability-name"><b>${esc(a.name || `Способность ${a.slot}`)}</b><span>${esc(`SLOT ${a.slot}`)}</span></div><div class="dc-ability-desc">${a.description || 'Описание способности временно недоступно.'}</div></div></article>`).join('')
-    : `<div class="dc-abilities-empty">${!name ? 'Выбери героя слева.' : loading ? 'Получаем сведения (не дольше 9 секунд)…' : error ? 'Справочник недоступен; нажми «Загрузить описание» ещё раз или открой внешнюю ссылку.' : 'Нажми «Загрузить описание» для получения способностей.'}</div>`;
+    ? abilities.map(a => `<article class="dc-ability-card"><div class="dc-ability-icon">${a.icon ? `<img src="${esc(a.icon)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<span>${esc(String(a.slot))}</span>`}</div><div class="dc-ability-copy"><div class="dc-ability-name"><b>${esc(a.name || `Способность ${a.slot}`)}</b><span>${esc(`SLOT ${a.slot}`)}</span></div><div class="dc-ability-desc">${esc(a.description || 'Описание способности временно недоступно.')}</div></div></article>`).join('')
+    : `<div class="dc-abilities-empty">${!name ? 'Выбери героя слева.' : loading ? 'Получаем сведения о способностях…' : error ? 'Источник способностей недоступен. Краткое описание героя уже показано выше.' : 'При наличии данных способности появятся после нажатия «Обновить данные».'}</div>`;
   $('heroDossierStatus').textContent = !name
     ? 'Нажми на карточку героя'
-    : details ? `Игровые данные · ${state.heroCompendiumOnline ? 'загружены' : 'кэш'}`
-    : loading ? 'Загрузка данных…' : error ? 'Источник недоступен' : 'Нет описания';
+    : loading ? 'Получаем актуальные данные…'
+    : error ? 'Краткий обзор доступен, API не отвечает'
+    : state.heroCompendiumOnline && abilities.length ? 'Актуальные игровые сведения' : 'Краткий обзор · без загрузки';
   $('heroDossierRetry').hidden = true;
   $('heroDossierFetch').disabled = !name || loading;
-  $('heroDossierFetch').textContent = loading ? 'ЗАГРУЗКА...' : details ? 'ОБНОВИТЬ ОПИСАНИЕ' : 'ЗАГРУЗИТЬ ОПИСАНИЕ';
+  $('heroDossierFetch').textContent = loading ? 'ОБНОВЛЕНИЕ...' : 'ОБНОВИТЬ ДАННЫЕ ГЕРОЯ';
   const heroSlug = encodeURIComponent(name.toLocaleLowerCase('en').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''));
-  $('heroDossierExternal').href = name ? `https://deadlock.io/en/heroes/${heroSlug}` : 'https://deadlock.io/en/heroes';
-  if (!details) {
-    $('heroSpotlightPlaystyle').textContent = !name ? 'Нажми на героя, чтобы просмотреть карточку.' : loading ? 'Пробуем получить сведения…' : error ? 'Справочник недоступен. Регистрация работает независимо.' : 'Нажми кнопку «Загрузить описание» ниже.';
-    $('heroSpotlightLore').textContent = !name ? 'Выбери героя в списке слева.' : loading ? 'Запрос ограничен по времени.' : error ? 'Открой игровое описание по ссылке — на сайте регистрация остаётся доступна.' : 'Описания способностей загружаются отдельно и не блокируют выбор.';
-  }
+  $('heroDossierExternal').href = heroReferenceUrl(name || 'Deadlock');
+
 }
 
 function renderHeroes({resetScroll = false} = {}) {
@@ -367,23 +367,25 @@ async function copyOverlay(mode) {
 }
 let heroCompendiumAttempt = 0;
 async function reloadHeroCompendium() {
+  const targetName = state.heroFocus;
+  if (!targetName) return;
   const attempt = ++heroCompendiumAttempt;
   state.heroCompendiumLoading = true;
   state.heroCompendiumError = '';
   renderHeroDossier();
   try {
-    const {compendium, online, error} = await loadHeroCompendium();
-    if (heroCompendiumAttempt !== attempt) return;
-    state.heroCompendium = compendium || {};
+    const {profile, online, error} = await loadHeroProfile(targetName,{force:true});
+    if(attempt !== heroCompendiumAttempt) return;
+    state.heroCompendium[heroKey(targetName)] = profile || fallbackProfile(targetName);
     state.heroCompendiumOnline = !!online;
-    state.heroCompendiumError = online ? '' : (error || 'Не удалось загрузить справочник.');
-  } catch (error) {
-    if (heroCompendiumAttempt !== attempt) return;
-    state.heroCompendium = {};
+    state.heroCompendiumError = online ? '' : (error || 'Нет соединения с API.');
+  } catch (err) {
+    if(attempt !== heroCompendiumAttempt) return;
+    state.heroCompendium[heroKey(targetName)] ||= fallbackProfile(targetName);
     state.heroCompendiumOnline = false;
-    state.heroCompendiumError = error?.message || 'Источник недоступен.';
+    state.heroCompendiumError = 'Не удалось получить актуальные данные.';
   } finally {
-    if (heroCompendiumAttempt === attempt) {
+    if(attempt === heroCompendiumAttempt) {
       state.heroCompendiumLoading = false;
       renderHeroDossier();
     }

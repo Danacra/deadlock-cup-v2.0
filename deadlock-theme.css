@@ -1,0 +1,154 @@
+/* Deadlock Cup 3.1 · Midnight city theme
+  Inspired by the visual language of Deadlock: ink blue, parchment,
+  brick crimson, brass and smoky turquoise. Not an official Valve site.
+*/
+:root{--bg:#0d161e;--panel:#17232a;--panel2:#1c2b31;--edge:#455158;--muted:#a9b4b5;--white:#f2e8d6;--lime:#d9b47b;--negative:#ff9c96;--dc-red:#be5859;--dc-gold:#d9b47b;--dc-cream:#f2e8d6;--dc-blue:#263b44;--dc-teal:#80a8ab}
+html{scrollbar-color:#986b5c #10191f}
+body{background:#0d161e!important;color:var(--white);background-image:radial-gradient(ellipse at 80% 8%,#2b3e452c 0%,transparent 45%),repeating-linear-gradient(90deg,transparent,transparent 159px,#d1a78307 160px)!important}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;opacity:.17;background:repeating-linear-gradient(0deg,transparent 0 3px,#94b3b309 4px 5px);mix-blend-mode:screen;z-index:1}
+.noise{opacity:.035}
+.header{background:#111c24f6;border-bottom:1px solid #a8906b44;box-shadow:0 7px 20px #0003}
+.header::before{content:'';position:absolute;inset:0 auto 0 0;width:8px;background:linear-gradient(#c85655,#8b363a);box-shadow:2px 0 18px #bd4e4c60}
+.brand-mark{background:var(--dc-red);color:var(--dc-cream);box-shadow:8px 8px 0 #78404a50}
+.brand-word{color:var(--dc-cream)}.brand-word b,.dot{color:var(--dc-gold)!important}
+.nav-btn{color:#b4bfc0}.nav-btn:hover,.nav-btn.active{color:var(--dc-cream);border-bottom-color:var(--dc-red);background:linear-gradient(0deg,#c45a5740,transparent 70%)}
+.nav-btn span{color:var(--dc-gold)}
+.header-label{color:var(--dc-cream)}.pulse{background:var(--dc-red);box-shadow:0 0 15px #e26e6e77}
+.demo-banner{background:#d9b47b;color:#171d20}
+.btn{border-color:#5e6263;background:#1b2930;color:var(--dc-cream);font-weight:900;letter-spacing:.075em}
+.btn-primary{background:var(--dc-red);border-color:var(--dc-red);color:#fff4e6;box-shadow:0 8px 25px #7b2e2e55}
+.btn-primary:hover{background:#d56d65;border-color:#d56d65;box-shadow:0 7px 30px #a44b4966}
+.btn-ghost,.btn-outline{background:#18242c;color:var(--dc-cream)}
+.btn-ghost:hover,.btn-outline:hover{border-color:var(--dc-gold);color:var(--dc-gold)}
+.hero-banner{min-height:500px;border-bottom:2px solid #ad534e66;background:linear-gradient(95deg,#0e1d26 0%,#14232f 47%,#22313b 100%)}
+.hero-banner::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 75% 38%,#c66a5740,transparent 45%),repeating-linear-gradient(120deg,#d69e7420 0 1px,transparent 2px 90px),linear-gradient(90deg,#0c1823 0%,transparent 75%);pointer-events:none}
+.hero-banner::after{content:'THE CURSED APPLE';position:absolute;bottom:50px;right:5%;font:700 11px Manrope,Arial,sans-serif;letter-spacing:.42em;color:#dfbd9355;pointer-events:none}
+.hero-left h1{color:var(--dc-cream);text-shadow:0 6px 30px #0009}
+.hero-left h1 em{color:var(--dc-red)}
+.hero-left>p{color:#d3d3c9;max-width:540px;font-size:14px}
+.eyebrow,.section-kicker{color:var(--dc-gold)}.eyebrow-line{background:var(--dc-red)}
+.hero-right{overflow:visible}.hero-monogram{color:#e5bd7a08;-webkit-text-stroke:2px #cead7a38}
+.hero-ring{border-color:#c67c6750}.ring-a::before,.ring-b::after{background:#e7bb83;box-shadow:0 0 14px #f2b57a99}
+.hero-serial{color:#dab991}
+.banner-bottom{color:#c8c1b2;border-top-color:#b48b5d50}
+.container.content{padding-top:42px}
+.section-heading{gap:24px}.section-heading h2{color:#f2e8d6!important;letter-spacing:.008em}
+.section-heading p{color:#b8c3c1;line-height:1.6}
+.section-numeral{display:none!important}
+.panel{background:linear-gradient(145deg,#1c2a31,#152028 80%);border-color:#56626866}
+.form-panel{padding:clamp(20px,3vw,38px)}
+.step{background:var(--dc-red);color:#ffeddb}.panel-heading h3{color:var(--dc-cream)}.panel-heading p{color:#b0b8ba}
+.form-divider{background:linear-gradient(90deg,transparent,#a676637a,transparent)}
+.field>span{color:#f3e7d2}.field>span b{color:#e49d77}.field>span small{color:#a0adaf}
+.field input,.field select,.field textarea,.roster-search,.filters select,.filters input,.hero-filter input{background:#0f1a21;border-color:#506068;color:#efe6d8}
+.field input:focus,.field select:focus,.field textarea:focus,.roster-search:focus,.filters input:focus,.hero-filter input:focus{border-color:var(--dc-gold);box-shadow:0 0 0 1px #d9b47b35}
+.selected-chip{background:#412e2d;border:1px solid #9e6f60;color:#f5c89a}
+.hero-filter span{color:var(--dc-gold)}
+.hero-card{background:#23323a;border:1px solid #4f5b5e;overflow:hidden;min-height:155px}
+.hero-card img{background:linear-gradient(135deg,#344e5d,#192731);object-position:center 22%}
+.hero-card .image-fallback{background:radial-gradient(ellipse at 60% 20%,#545965,#202b35 68%);color:#d6ad75}
+.hero-card .hero-name{background:#111e26;color:#f0e8d9;font-size:13px!important;letter-spacing:.04em;padding:8px 8px 7px}
+.hero-card:hover{transform:translateY(-3px);border-color:#ddaf7f;box-shadow:0 10px 22px #0e101fa1}
+.hero-card.selected{border-color:#f0c18a;outline:2px solid #b44b4b;box-shadow:0 0 0 1px #c96560 inset}
+.hero-card.selected::after{background:#b95754;color:#fff3e3}
+.hero-card .hero-check{background:#c65b54;color:#fff1de}
+.hero-load-status{color:#b6c0bf}
+.privacy-note{background:#202a30;border-left:3px solid var(--dc-red);color:#adbcbf}
+.privacy-note strong{color:#f4dfbc}.shield{color:var(--dc-red)}
+.info-panel{background:linear-gradient(135deg,#273944,#172630);border:1px solid #5a6667}
+.info-big{color:var(--dc-gold)}.info-caption{color:#e2d8c4}.info-panel p{color:#bbc4c2}
+.info-rule{background:#6b655b}
+.text-link{color:var(--dc-gold)}.text-link:hover{color:#f3d1a4}
+.info-quote{border-color:#675b54;background:#17232a}.info-quote>span,.info-quote em{color:var(--dc-red)}.info-quote p{color:#efe4d2}
+.dc-dossier-panel{background:linear-gradient(148deg,#293742,#15242c 65%);border:1px solid #735f5c;box-shadow:0 10px 32px #0003;padding:21px}
+.dc-dossier-top{border-bottom-color:#7d655a}.dc-dossier-pill{border-color:#ba6662;background:#502e35;color:#ffddae}
+.dc-dossier-portrait{background:#2b4854;border-color:#856757}.dc-dossier-portrait span{color:var(--dc-gold)}
+.dc-dossier-copy p{color:#f1e6d5}.dc-dossier-lore{color:#b6c7c8}
+.dc-dossier-abilities-head{border-top-color:#685a56;color:#f4e6d2}.dc-hero-data-actions small{color:#bbc6c4}
+.dc-action{background:#b55352;color:#fff1df;border-color:#b55352}.dc-action-secondary{background:#24323c;color:#d5c6b2;border-color:#6f7270}.dc-action:hover{border-color:#e6b98a;color:#ffe0b9}
+.dc-ability-card{background:#1a2b34;border:1px solid #566065}
+.dc-ability-icon{background:#32414a;border:1px solid #7d6760}.dc-ability-icon span{color:var(--dc-gold)}
+.dc-ability-name{color:#f2e7d5}.dc-ability-name span{color:#d6b793}.dc-ability-desc,.dc-abilities-empty{color:#bacac8}
+.dc-abilities-empty{border:1px dashed #6c6564}
+.dc-patron-names{color:#ccb397;border-top:1px solid #695c55}
+.dc-steam-consent{background:#22313a;border-color:#6c6862;color:#c6cecc}.dc-steam-consent input{accent-color:#c65b54}
+.roster-panel{background:linear-gradient(140deg,#192832,#17242c)}
+.roster-entry{background:linear-gradient(120deg,#273842,#1b2a32);border:1px solid #536068;position:relative;overflow:hidden}
+.roster-entry::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:#bd5c59}
+.roster-entry:hover{border-color:#b88c6f;background:#2d3e47}
+.roster-index{color:#d9aa79}.roster-name{color:#eee0cb}
+.roster-foot{color:#b3bfc0;border-top-color:#627071}
+.metric,.t-team-card,.t-admin-team{background:linear-gradient(150deg,#22343d,#17262f);border-color:#52636b}
+.metric strong{color:#e4b779}.metric span{color:#c8beb1}
+.t-bracket-toolbar,.t-admin-topbar,.admin-list-panel,.broadcast-panel,.obs-panel,.t-reserve{background:#1a2931;border-color:#5c646a}
+.t-placeholder,.t-slot-empty{background:linear-gradient(135deg,#24353d,#1c2b32);color:#c2c6c5;border-color:#506067}
+.t-placeholder::before{color:#be66621c}
+.t-match-card{background:#21313b;border-color:#5e6162}
+.t-match-card.finished{border-left-color:#d4ab79}
+.t-match-side{color:#f4ead7}
+.dc-team-editor{border-color:#a56e5e;background:#1d2d36}
+.dc-team-logo,.dc-match-logo{border-color:var(--team-accent,#d9b47b)}
+.dc-steam-sync{color:#e2b77c;border-color:#9a766a}
+.action-btn,.mini-btn{background:#24343a;border:1px solid #756a60;color:#e8d5bf}
+.action-btn:hover,.mini-btn:hover{border-color:#d6a978;color:#ffd7a0}
+.footer{background:#111c24;border-top:2px solid #ad5b54;color:#a9b9bf}
+.footer-inner>span{color:#a9a9a1}
+.message.ok{color:#e4c08d}.message.error{color:#ffada6}
+/* CINEMATIC HERO PORTRAITS / REMOTE GAME-ASSET IMAGES */
+.dc-scene{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.dc-scene-person{position:absolute;height:100%;width:33%;top:0;display:flex;align-items:flex-end;justify-content:center;filter:drop-shadow(0 0 30px #0009);transition:opacity .25s}
+.dc-scene-img{width:100%;height:100%;object-fit:cover;object-position:center top;mask-image:linear-gradient(90deg,transparent 0%,#000 21%,#000 80%,transparent 100%),linear-gradient(0deg,transparent 0%,#000 18%,#000 96%);mask-composite:intersect;-webkit-mask-image:linear-gradient(0deg,transparent 1%,#000 22%,#000 88%);opacity:.78;filter:contrast(1.05) saturate(.85)}
+.dc-image-missing{display:none}
+.dc-scene-register .dc-scene-person{width:43%;height:104%}
+.dc-scene-register .dc-scene-person-0{right:17%;top:5%;z-index:3}
+.dc-scene-register .dc-scene-person-1{right:0%;top:13%;width:37%;z-index:2;opacity:.65}
+.dc-scene-register .dc-scene-person-2{right:46%;top:25%;width:30%;z-index:1;opacity:.42}
+.dc-scene-register .dc-scene-img{object-fit:contain;object-position:bottom}
+.hero-right .hero-monogram{position:absolute;opacity:.4;z-index:0}
+.hero-right .hero-ring{z-index:0}
+.dc-view-hero{background:linear-gradient(100deg,#1a2d38 0%,#273941 67%,#38292e 100%);border:1px solid #75635e;border-left:5px solid #ad5452;padding:40px clamp(24px,4vw,54px);min-height:300px;display:flex;flex-direction:column;justify-content:center;box-shadow:inset 0 -3px 0 #b35e5650}
+.dc-view-hero::before{content:'THE CITY / 1929';font:800 11px Manrope,Arial,sans-serif;letter-spacing:.45em;left:auto;right:21px;top:20px;transform:none;color:#bd9a79a0;-webkit-text-stroke:0}
+.dc-view-hero::after{content:'';right:4%;top:12%;width:240px;height:240px;border:2px solid #d4a8792b;border-radius:50%;box-shadow:0 0 0 28px #ce887f0a,0 0 0 56px #c88e6d08;transform:none;animation:dc-theme-spin 30s linear infinite}
+@keyframes dc-theme-spin{to{transform:rotate(360deg)}}
+.dc-view-hero .section-heading{position:relative;z-index:3;max-width:62%;pointer-events:none}
+.dc-view-hero .section-kicker{position:relative;z-index:3}
+.dc-view-hero .section-heading p{color:#eadfce;text-shadow:0 2px 8px #0008}
+.dc-view-hero .section-heading h2{text-shadow:0 3px 18px #0009;font-size:clamp(39px,5.4vw,69px)}
+.dc-view-hero-roster,.dc-view-hero-admin{background:linear-gradient(100deg,#1a2d38,#243941 70%,#3a292e)}
+.dc-view-hero-teams{background:linear-gradient(100deg,#202d36,#293b3c 70%,#493434)}
+.dc-view-hero-bracket{background:linear-gradient(100deg,#1a2834,#2d3541 72%,#47302b)}
+.dc-view-hero .dc-scene{z-index:1;left:53%;right:-1%;pointer-events:none;opacity:.85}
+.dc-view-hero .dc-scene-person{width:45%}
+.dc-view-hero .dc-scene-person-0{left:-2%;top:5%;opacity:.9}
+.dc-view-hero .dc-scene-person-1{left:24%;top:5%;opacity:.76}
+.dc-view-hero .dc-scene-person-2{left:52%;top:18%;opacity:.6}
+/* GALLERY - strongly visible game illustrations */
+.dc-archive-gallery{position:relative;padding:20px 22px 24px;background:linear-gradient(120deg,#20323d,#14242d);border:1px solid #64717a;border-top:4px solid #b55753;margin-bottom:50px;overflow:hidden;box-shadow:0 16px 46px #030a1052}
+.dc-gallery-heading{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap;margin-bottom:16px}
+.dc-gallery-heading>span{font:800 10px Manrope,Arial,sans-serif;color:#c89b7f;letter-spacing:.23em}
+.dc-gallery-heading>strong{font:800 clamp(19px,2.2vw,30px) 'Deadlock Occult',Rajdhani,Arial,sans-serif;color:var(--dc-cream)}
+.dc-gallery-heading>small{color:#acb7b9;font-size:10px;letter-spacing:.07em}
+.dc-gallery-scenes{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+.dc-gallery-scenes .dc-scene-person{position:relative;top:auto!important;left:auto!important;right:auto!important;width:100%!important;height:180px!important;overflow:hidden;border:1px solid #65716e;background:#263941;filter:none;opacity:1!important}
+.dc-gallery-scenes .dc-scene-img{height:148px;object-fit:cover;object-position:center 15%;mask-image:none;-webkit-mask-image:none;opacity:1;filter:none;transition:transform .3s}
+.dc-gallery-scenes .dc-scene-person:hover .dc-scene-img{transform:scale(1.09)}
+.dc-gallery-scenes .dc-scene-person::after{content:'';position:absolute;inset:0;background:linear-gradient(0deg,#0d1a23 0%,transparent 45%);pointer-events:none}
+.dc-gallery-scenes .dc-scene-person span{position:absolute;bottom:10px;left:11px;color:#fff0db;font:800 14px Rajdhani,Arial,sans-serif;z-index:2;text-transform:uppercase}
+.dc-gallery-scenes .dc-scene-person:nth-child(even){border-bottom:3px solid #bf5a54}
+.dc-gallery-scenes .dc-scene-person:nth-child(odd){border-bottom:3px solid #d9b47b}
+.dc-gallery-scenes .dc-scene-person:hover{border-color:#f1c68d}
+/* Strong separation and breathing room */
+.dc-decorated-view>.panel,.dc-decorated-view>.t-public-teams,.dc-decorated-view>#bracketPublic{margin-top:22px}
+.dc-decorated-view .section-heading{margin-bottom:12px}
+.registration-layout{grid-template-columns:minmax(0,1fr) 370px;gap:26px}
+.info-panel,.dc-dossier-panel,.info-quote{margin-bottom:18px}
+.dc-dossier-lore{max-height:130px}
+@media(max-width:1100px){.dc-gallery-scenes{grid-template-columns:repeat(3,minmax(0,1fr))}.dc-scene-register .dc-scene-person-2{display:none}.registration-layout{grid-template-columns:minmax(0,1fr) 325px}}
+@media(max-width:830px){.registration-layout{grid-template-columns:1fr}.dc-gallery-scenes{grid-template-columns:repeat(3,minmax(0,1fr))}.dc-view-hero .section-heading{max-width:80%}.dc-view-hero .dc-scene{left:54%;opacity:.45}}
+@media(max-width:530px){.dc-gallery-scenes{grid-template-columns:repeat(2,minmax(0,1fr))}.dc-gallery-scenes .dc-scene-person{height:142px!important}.dc-gallery-scenes .dc-scene-img{height:116px}.dc-archive-gallery{padding:15px;margin-bottom:32px}.dc-gallery-heading{display:block}.dc-gallery-heading>span,.dc-gallery-heading>strong,.dc-gallery-heading>small{display:block;margin:5px 0}.dc-view-hero{min-height:215px;padding:23px 20px}.dc-view-hero .section-heading{max-width:100%}.dc-view-hero .dc-scene{opacity:.16;left:23%}.hero-right .dc-scene-register{opacity:.3}.hero-banner{min-height:395px}.hero-left h1{font-size:clamp(52px,12vw,76px)}.header::before{width:4px}}
+@media(prefers-reduced-motion:reduce){.dc-view-hero::after{animation:none}.dc-gallery-scenes .dc-scene-img{transition:none}}
+/* If an external portrait is unavailable, never display a broken-image icon. */
+.dc-gallery-scenes .dc-scene-person{background:radial-gradient(ellipse at 50% 22%,#47616a 0%,#24333d 60%,#121f27 100%)}
+.dc-gallery-scenes .dc-scene-person::before{content:'THE CURSED CITY';position:absolute;inset:25px 0 auto;text-align:center;font:800 10px Rajdhani,Arial,sans-serif;letter-spacing:.2em;color:#d9b47b66}
+.dc-gallery-scenes .dc-scene-person::after{z-index:1}
+.dc-gallery-scenes .dc-scene-person span{z-index:2}

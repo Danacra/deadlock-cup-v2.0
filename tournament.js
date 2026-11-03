@@ -8,7 +8,7 @@ function demoRead() {
     if (saved && Array.isArray(saved.teams)) return saved;
   } catch { /* first visit */ }
   return {
-    teams: [{id:'demo-team-one',name:'HEALING RITE',team_color:'#B6FF00',logo_url:'',created_at:'2026-01-01'},
+    teams: [{id:'demo-team-one',name:'HEALING RITE',team_color:'#D9B47B',logo_url:'',created_at:'2026-01-01'},
       {id:'demo-team-two',name:'NIGHT SHIFT',team_color:'#7AD8FF',logo_url:'',created_at:'2026-01-02'}],
     members: [{registration_id:'sample-0',team_id:'demo-team-one'},
       {registration_id:'sample-1',team_id:'demo-team-one'},
@@ -34,7 +34,7 @@ export function createTournamentController({isAdmin, getRegistrations}) {
     el.textContent = message; el.className = `message ${type}`;
   };
   const teamName = id => data.teams.find(t=>t.id===id)?.name || 'ОЖИДАЕТСЯ';
-  const colorFor = team => /^#[0-9a-f]{6}$/i.test(team?.team_color||'') ? team.team_color : '#B6FF00';
+  const colorFor = team => /^#[0-9a-f]{6}$/i.test(team?.team_color||'') ? team.team_color : '#D9B47B';
   const avatarMarkup = url => {
     try { const u = new URL(url); return u.protocol==='https:' && ['avatars.steamstatic.com','avatars.fastly.steamstatic.com','avatars.akamai.steamstatic.com','avatars.cloudflare.steamstatic.com','steamcdn-a.akamaihd.net','cdn.akamai.steamstatic.com'].includes(u.hostname)
       ? `<img class="dc-team-avatar" src="${esc(u.href)}" alt="" loading="lazy">` : ''; } catch { return ''; }
@@ -125,7 +125,7 @@ export function createTournamentController({isAdmin, getRegistrations}) {
         ]);
         if (teams.error && /team_color|logo_url/.test(String(teams.error.message || ''))) {
           const basic = await db.from('tournament_teams').select('id,name,created_at').order('created_at');
-          teams = {...basic, data:(basic.data || []).map(t=>({...t,team_color:'#B6FF00',logo_url:''}))};
+          teams = {...basic, data:(basic.data || []).map(t=>({...t,team_color:'#D9B47B',logo_url:''}))};
         }
         for (const part of [teams,roster,matches,broadcast]) if(part.error)throw part.error;
         data.teams=teams.data||[];data.publicMembers=roster.data||[];data.matches=matches.data||[];data.broadcast=broadcast.data;
@@ -177,7 +177,7 @@ export function createTournamentController({isAdmin, getRegistrations}) {
     if(name.length<2||name.length>36)return flash('Название команды: от 2 до 36 символов.','error');
     await action(async()=>{
       if(configured){const {error}=await db.from('tournament_teams').insert({name});if(error)throw error;}
-      else{const d=demoRead();if(d.teams.some(t=>t.name.toLowerCase()===name.toLowerCase()))throw new Error('Команда с таким названием уже существует');d.teams.push({id:crypto.randomUUID(),name,team_color:'#B6FF00',logo_url:'',created_at:new Date().toISOString()});demoSave(d);}
+      else{const d=demoRead();if(d.teams.some(t=>t.name.toLowerCase()===name.toLowerCase()))throw new Error('Команда с таким названием уже существует');d.teams.push({id:crypto.randomUUID(),name,team_color:'#D9B47B',logo_url:'',created_at:new Date().toISOString()});demoSave(d);}
       $('newTeamName').value='';
     },'Команда создана.');
   }
