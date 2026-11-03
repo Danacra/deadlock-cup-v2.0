@@ -155,7 +155,7 @@ export function createTournamentController({isAdmin, getRegistrations, onTeamsCh
       if (configured) {
         const {data:members,error}=await db.from('team_members').select('registration_id,team_id');
         if(error)throw error;data.members=members||[];
-        const {data:guests,error:ge}=await db.from('team_guest_members').select('id,team_id,nickname,discord,steam_profile,hours,region,hero_names,notes');
+        const {data:guests,error:ge}=await db.from('team_guest_members').select('id,team_id,nickname,discord,steam_profile,hours,region,hero_names,notes,created_at');
         if(ge && !/does not exist|team_guest_members/i.test(ge.message||''))throw ge;
         data.guests=guests||[];
       } else { const saved=demoRead(); data.members=saved.members; data.guests=saved.guestMembers||[]; }
@@ -252,12 +252,33 @@ export function createTournamentController({isAdmin, getRegistrations, onTeamsCh
       closeEditor();
     },'Эмблема удалена.','tournamentRosterMessage');
   }
-  async function deleteTeam(id) {
-    const team=data.teams.find(t=>t.id===id);if(!team||!confirm(`Удалить «${team.name}»? Её игроки вернутся в резерв. Если команда участвует в сетке, сначала очисти сетку.`))return;
-    await action(async()=>{
-      if(configured){const {error}=await db.from('tournament_teams').delete().eq('id',id);if(error)throw error;}
-      else{const d=demoRead();if(d.matches.some(m=>[m.left_team,m.right_team,m.winner].includes(id)))throw new Error('Сначала очистите турнирную сетку');d.teams=d.teams.filter(t=>t.id!==id);d.members=d.members.filter(m=>m.team_id!==id);d.guestMembers=(d.guestMembers||[]).filter(g=>g.team_id!==id);demoSave(d);}
-    },'Команда удалена.');
+  // The FK in team_registration_requests uses ON DELETE SET NULL: retain an
+  // audit record of approved applications while removing team-only private
+  // profiles (team_guest_members cascade). Independently registered people
+  // stay in registrations and return to the reserve.
+  async function deleteTeam(id, origin='roster') {
+    const target=origin==='applications'?'teamApplicationMessage':'tournamentMessage';
+    const team=data.teams.find(t=>t.id===id);
+    if(!team)return flash('Команда уже удалена или не найдена. Обнови список заявок.','error',target);
+    if(data.matches.some(m=>[m.left_team,m.right_team,m.winner].includes(id)))
+      return flash('Сначала очисти турнирную сетку: команда уже участвует в матчах. Результаты других команд не будут удалены автоматически.','error',target);
+    if(!confirm(`Удалить принятую команду «${team.name}»?\n\nЕё командные анкеты исчезнут из списка участников. Самостоятельные анкеты останутся в базе и вернутся в резерв. Запись об исходной командной заявке сохранится как «УДАЛЕНА».`))return;
+    return action(async()=>{
+      if(configured){
+        const {data:deleted,error}=await db.from('tournament_teams').delete().eq('id',id).select('id');
+        if(error)throw error;
+        if(!deleted?.some(row=>row.id===id))throw new Error('Удаление не подтверждено. Проверь права администратора в Supabase.');
+      }else{
+        const d=demoRead();
+        if(d.matches.some(m=>[m.left_team,m.right_team,m.winner].includes(id)))throw new Error('Сначала очистите турнирную сетку');
+        d.teams=d.teams.filter(t=>t.id!==id);
+        d.members=d.members.filter(m=>m.team_id!==id);
+        d.guestMembers=(d.guestMembers||[]).filter(g=>g.team_id!==id);
+        // Mirror the database ON DELETE SET NULL behavior.
+        (d.teamRequests||[]).forEach(q=>{if(q.approved_team_id===id)q.approved_team_id=null;});
+        demoSave(d);
+      }
+    },'Команда удалена. Индивидуальные анкеты игроков сохранены.',target);
   }
   const pendingMoves=new Set();
   async function movePlayer(playerId,teamId) {
@@ -440,14 +461,14 @@ export function createTournamentController({isAdmin, getRegistrations, onTeamsCh
     host.innerHTML=requests.length?requests.map(q=>{
       const profiles=Array.isArray(q.member_profiles)&&q.member_profiles.length?q.member_profiles:q.member_nicknames.map((nickname,i)=>({nickname,discord:i===0?q.captain_discord:'',hero_names:[]}));
       return `<article class="team-application">
-        <div class="team-application-head"><div><h4>${esc(q.team_name)}</h4><small>${new Date(q.created_at).toLocaleString('ru-RU')} · ${esc(q.region)} · ${q.member_nicknames?.length||0}/6 игроков</small></div><span class="state ${esc(q.status)}">${q.status==='pending'?'ОЖИДАЕТ':q.status==='approved'?'ПРИНЯТА':'ОТКЛОНЕНА'}</span></div>
+        <div class="team-application-head"><div><h4>${esc(q.team_name)}</h4><small>${new Date(q.created_at).toLocaleString('ru-RU')} · ${esc(q.region)} · ${q.member_nicknames?.length||0}/6 игроков</small></div><span class="state ${esc(q.status==='approved'&&!q.approved_team_id?'deleted':q.status)}">${q.status==='pending'?'ОЖИДАЕТ':q.status==='approved'?(q.approved_team_id?'ПРИНЯТА':'УДАЛЕНА'):'ОТКЛОНЕНА'}</span></div>
         <div class="team-application-profiles">${profiles.map((p,i)=>`<details class="team-application-profile" ${i===0?'open':''}>
           <summary><b>${i===0?'★ КАПИТАН':'ИГРОК '+(i+1)}</b><span>${esc(p.nickname)}</span><small>Данные анкеты ▾</small></summary>
           ${infoCells(p)}
         </details>`).join('')}</div>
         ${q.note?`<div class="team-application-private">Комментарий по команде: ${esc(q.note)}</div>`:''}
         ${!Array.isArray(q.member_profiles)||!q.member_profiles.length?'<p class="team-profile-old">Это старая заявка v3.5: полные данные игроков капитан тогда не заполнял.</p>':''}
-        ${q.status==='pending'?`<div class="team-application-actions"><button class="btn btn-primary" type="button" data-t-action="accept-request" data-request-id="${esc(q.id)}">✓ ПРИНЯТЬ КОМАНДУ</button><button class="btn btn-outline" type="button" data-t-action="reject-request" data-request-id="${esc(q.id)}">ОТКЛОНИТЬ</button></div>`:''}
+        ${q.status==='pending'?`<div class="team-application-actions"><button class="btn btn-primary" type="button" data-t-action="accept-request" data-request-id="${esc(q.id)}">✓ ПРИНЯТЬ КОМАНДУ</button><button class="btn btn-outline" type="button" data-t-action="reject-request" data-request-id="${esc(q.id)}">ОТКЛОНИТЬ</button></div>`:q.status==='approved'&&q.approved_team_id?`<div class="team-application-actions"><button class="btn btn-outline dc-delete-approved-team" type="button" data-t-action="delete-approved-request" data-request-id="${esc(q.id)}">× УДАЛИТЬ ПРИНЯТУЮ КОМАНДУ</button></div>`:q.status==='approved'?'<p class="team-profile-old">Команда удалена. Заявка сохранена в истории.</p>':''}
       </article>`;
     }).join(''):'<div class="empty-mini">Заявок на команды пока нет.</div>';
   }
@@ -463,7 +484,7 @@ export function createTournamentController({isAdmin, getRegistrations, onTeamsCh
   async function loadTeamRequests(){
     if(!isAdmin())return;
     try{
-      if(configured){const {data:requests,error}=await db.from('team_registration_requests').select('id,team_name,captain_nickname,captain_discord,region,member_nicknames,member_profiles,note,status,created_at').order('created_at',{ascending:false}).limit(100);if(error)throw error;data.requests=requests||[];}
+      if(configured){const {data:requests,error}=await db.from('team_registration_requests').select('id,team_name,captain_nickname,captain_discord,region,member_nicknames,member_profiles,note,status,created_at,approved_team_id').order('created_at',{ascending:false}).limit(100);if(error)throw error;data.requests=requests||[];}
       else data.requests=demoRead().teamRequests||[];
       renderTeamRequests();
     }catch(e){$('teamApplicationMessage').textContent=`Заявки команд: ${errorMessage(e)}. Проверь миграцию upgrade-team-registration-v3.5.sql`;}
@@ -585,7 +606,16 @@ export function createTournamentController({isAdmin, getRegistrations, onTeamsCh
         return setMatchResult(round,match,Number(inputs[0].value),Number(inputs[1].value));
       }
     });
-    $('teamApplicationsList').addEventListener('click',e=>{const btn=e.target.closest('[data-t-action]');if(!btn)return;if(btn.dataset.tAction==='accept-request')reviewRequest(btn.dataset.requestId,true);if(btn.dataset.tAction==='reject-request')reviewRequest(btn.dataset.requestId,false);});
+    $('teamApplicationsList').addEventListener('click',e=>{
+      const btn=e.target.closest('[data-t-action]');if(!btn)return;
+      if(btn.dataset.tAction==='accept-request')return reviewRequest(btn.dataset.requestId,true);
+      if(btn.dataset.tAction==='reject-request')return reviewRequest(btn.dataset.requestId,false);
+      if(btn.dataset.tAction==='delete-approved-request'){
+        const request=data.requests.find(q=>q.id===btn.dataset.requestId);
+        if(!request || request.status!=='approved' || !request.approved_team_id)return flash('Принятая команда уже удалена. Обнови заявки.','error','teamApplicationMessage');
+        return deleteTeam(request.approved_team_id,'applications');
+      }
+    });
     adminArea.addEventListener('change',e=>{
       const dropdown=e.target.closest('.t-assignment-select');
       if(dropdown)movePlayer(dropdown.dataset.playerId,dropdown.value);
@@ -607,6 +637,13 @@ export function createTournamentController({isAdmin, getRegistrations, onTeamsCh
     $('unassignedDropzone').addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='move';});
     $('unassignedDropzone').addEventListener('drop',e=>{e.preventDefault();const id=e.dataTransfer.getData('text/plain');if(id)movePlayer(id,'');});
   }
+  function getApprovedTeamGuestProfiles() {
+    if(!isAdmin())return [];
+    return data.guests.filter(g=>data.teams.some(t=>t.id===g.team_id)).map(g=>{
+      const team=data.teams.find(t=>t.id===g.team_id);
+      return {...g,team_name:team.name,is_captain:String(team.captain_nickname||'').trim().toLocaleLowerCase()===String(g.nickname||'').trim().toLocaleLowerCase()};
+    });
+  }
   function init() { active=true;listen(); }
-  return {init,loadPublic,loadAdmin,renderAdminTeams,setCaptainForPlayer,captainActionForPlayer};
+  return {init,loadPublic,loadAdmin,renderAdminTeams,setCaptainForPlayer,captainActionForPlayer,getApprovedTeamGuestProfiles};
 }

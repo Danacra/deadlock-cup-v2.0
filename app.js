@@ -155,11 +155,11 @@ function downloadFile(filename, body, mime) {
 function csvEscape(value) { return `"${String(value ?? '').replace(/\r?\n/g, ' ').replaceAll('"', '""')}"`; }
 function exportData(format) {
   if (!state.isAdmin) return;
-  const rows = state.registrations;
+  const rows = getAllPrivateAdminProfiles();
   if (format === 'json') {
     downloadFile('deadlock-participants-private.json', JSON.stringify(rows, null, 2), 'application/json;charset=utf-8');
   } else {
-    const columns = ['nickname', 'discord', 'steam_profile', 'hours', 'region', 'hero_names', 'notes', 'status', 'submitted_at'];
+    const columns = ['nickname', 'discord', 'steam_profile', 'hours', 'region', 'hero_names', 'notes', 'status', 'submitted_at', 'record_source', 'team_name'];
     const csv = '\ufeff' + columns.join(';') + '\r\n' + rows.map(r => columns.map(c => csvEscape(c === 'hero_names' ? (r[c] || []).join(', ') : r[c])).join(';')).join('\r\n');
     downloadFile('deadlock-participants-private.csv', csv, 'text/csv;charset=utf-8');
   }
@@ -208,28 +208,40 @@ async function fetchRegistrations() {
   } catch (err) { $('adminRows').textContent = `Ошибка загрузки анкет: ${errorText(err)}`; }
 }
 function statusLabel(s) { return s === 'approved' ? 'ПРИНЯТ' : s === 'rejected' ? 'ОТКЛОНЁН' : 'ОЖИДАЕТ'; }
+function getAllPrivateAdminProfiles() {
+  if(!state.isAdmin)return [];
+  const solo=state.registrations.map(r=>({...r,record_source:'individual',team_name:''}));
+  const fromTeams=tournament.getApprovedTeamGuestProfiles().map(g=>({
+    ...g,id:`guest-${g.id}`,original_guest_id:g.id,
+    record_source:'team',status:'approved',team_name:g.team_name,
+    // The captain cannot authorize another player's Steam avatar publication.
+    steam_avatar_opt_in:false,steam_avatar_url:'',
+    submitted_at:g.created_at||null
+  }));
+  return [...solo,...fromTeams].sort((a,b)=>(Date.parse(b.submitted_at)||0)-(Date.parse(a.submitted_at)||0));
+}
 function renderAdmin() {
-  const rows = state.registrations;
+  const rows = getAllPrivateAdminProfiles();
   $('metricAll').textContent = rows.length;
   $('metricPending').textContent = rows.filter(r => r.status === 'pending').length;
   $('metricApproved').textContent = rows.filter(r => r.status === 'approved').length;
   $('metricRejected').textContent = rows.filter(r => r.status === 'rejected').length;
   const needle = $('adminSearch').value.toLocaleLowerCase().trim();
   const filtered = rows.filter(r => (state.adminStatus === 'all' || r.status === state.adminStatus) &&
-    (r.nickname.toLocaleLowerCase().includes(needle) || r.discord.toLocaleLowerCase().includes(needle)));
+    (r.nickname.toLocaleLowerCase().includes(needle) || (r.discord||'').toLocaleLowerCase().includes(needle) || (r.team_name||'').toLocaleLowerCase().includes(needle)));
   $('adminRows').innerHTML = filtered.length ? filtered.map(r => {
     const heroes = (r.hero_names || []).map(name => {
       const hero = state.heroes.find(h => h.name === name);
       return `<span class="hero-mini">${imageMarkup(hero)}${esc(name)}</span>`;
     }).join('');
     return `<article class="player-record" data-id="${esc(r.id)}"><div>
-       <div class="player-record-head">${steamAvatarMarkup(r.steam_avatar_url)}<strong>${esc(r.nickname)}</strong><span class="state ${esc(r.status)}">${statusLabel(r.status)}</span></div>
-       <div class="player-details"><div><span>DISCORD / PRIVATE</span>${esc(r.discord)}</div><div><span>РЕГИОН</span>${esc(r.region)}</div><div><span>ИГРОВЫХ ЧАСОВ</span>${Number(r.hours)}</div>
+       <div class="player-record-head">${steamAvatarMarkup(r.steam_avatar_url)}<strong>${esc(r.nickname)}</strong><span class="state ${esc(r.status)}">${statusLabel(r.status)}</span>${r.record_source==='team'?'<span class="dc-team-profile-badge">АНКЕТА КОМАНДЫ</span>':''}</div>
+       <div class="player-details">${r.record_source==='team'?`<div class="wide"><span>КОМАНДА</span>${esc(r.team_name)} ${r.is_captain?'· ★ КАПИТАН':''}</div>`:''}<div><span>DISCORD / PRIVATE</span>${esc(r.discord||'—')}</div><div><span>РЕГИОН</span>${esc(r.region||'—')}</div><div><span>ИГРОВЫХ ЧАСОВ</span>${Number(r.hours||0)}</div>
        <div class="wide"><span>STEAM / PRIVATE</span>${esc(r.steam_profile || 'Не указан')}</div>
        ${r.notes ? `<div class="wide"><span>КОММЕНТАРИЙ / PRIVATE</span>${esc(r.notes)}</div>` : ''}
-       <div class="wide"><span>ДАТА РЕГИСТРАЦИИ</span>${esc(new Date(r.submitted_at).toLocaleString('ru-RU'))}</div></div>
+       <div class="wide"><span>${r.record_source==='team'?'ДАТА ДОБАВЛЕНИЯ В КОМАНДУ':'ДАТА РЕГИСТРАЦИИ'}</span>${r.submitted_at?esc(new Date(r.submitted_at).toLocaleString('ru-RU')):'—'}</div></div>
        <div class="record-heroes">${heroes}</div></div>
-       <div class="record-actions">${tournament.captainActionForPlayer(r.id)}${r.steam_profile && r.steam_avatar_opt_in ? `<button class="action-btn dc-steam-sync" data-action="steam-avatar" data-id="${esc(r.id)}" type="button">↻ STEAM ФОТО</button>` : ''}<button class="action-btn" data-action="approved" data-id="${esc(r.id)}">✓ ПРИНЯТЬ</button><button class="action-btn" data-action="rejected" data-id="${esc(r.id)}">× ОТКЛОНИТЬ</button><button class="action-btn danger" data-action="delete" data-id="${esc(r.id)}">УДАЛИТЬ</button></div></article>`;
+       <div class="record-actions">${r.record_source==='team'?'<span class="dc-team-profile-note">Данные указал капитан. Состав и капитан меняются в разделе «Составы команд».</span>':`${tournament.captainActionForPlayer(r.id)}${r.steam_profile && r.steam_avatar_opt_in ? `<button class="action-btn dc-steam-sync" data-action="steam-avatar" data-id="${esc(r.id)}" type="button">↻ STEAM ФОТО</button>` : ''}<button class="action-btn" data-action="approved" data-id="${esc(r.id)}">✓ ПРИНЯТЬ</button><button class="action-btn" data-action="rejected" data-id="${esc(r.id)}">× ОТКЛОНИТЬ</button><button class="action-btn danger" data-action="delete" data-id="${esc(r.id)}">УДАЛИТЬ</button>`}</div></article>`;
   }).join('') : '<div class="empty-mini">Анкет нет или ни одна не соответствует фильтру.</div>';
   const eligible = rows.filter(r => r.status !== 'rejected');
   ['leftPlayer', 'rightPlayer'].forEach(id => {

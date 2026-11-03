@@ -1,0 +1,19 @@
+/* v3.8 - approved team request actions & captain-submitted player profiles. */
+#view-admin .dc-team-profile-badge {
+  display:inline-flex;align-items:center;border:1px solid #566f34;background:#182413;
+  color:#b6ff00;padding:4px 8px;font-weight:700;font-size:11px;line-height:1.3;letter-spacing:.055em;
+}
+#view-admin .dc-team-profile-note {color:#a6b59c;line-height:1.5;font-size:12px;max-width:410px;}
+#view-admin .player-record:has(.dc-team-profile-badge){border-left:3px solid #b6ff00;}
+#view-admin .dc-delete-approved-team {
+  color:#ffaaa6;border-color:#9b5049;background:rgba(136,36,35,.14);
+  padding:10px 16px;white-space:normal;
+}
+#view-admin .dc-delete-approved-team:hover {background:rgba(166,52,48,.28);color:#ffdfdc;}
+#view-admin .team-application-actions {display:flex;gap:12px;flex-wrap:wrap;margin-top:16px;}
+@media(max-width:640px){
+ #view-admin .dc-team-profile-badge{white-space:normal;}
+ #view-admin .dc-delete-approved-team {width:100%;}
+}
+
+#view-admin .team-application .state.deleted {border-color:#536150;color:#a4b49b;background:#1b211a;}
