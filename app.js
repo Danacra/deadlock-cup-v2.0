@@ -1,8 +1,7 @@
 import { db, configured, initializeDatabase, demo, loadHeroes, FALLBACK_HEROES, escapeHTML as esc, heroImageSources } from './db.js';
 import { createTournamentController } from './tournament.js';
-import {loadHeroProfile, fallbackProfile, heroReferenceUrl} from './hero-profile.js';
 const $ = (id) => document.getElementById(id);
-const state = { view: 'register', heroes: [], selected: [], roster: [], registrations: [], broadcast: null, isAdmin: false, adminStatus: 'all', heroFocus: '', heroCompendium: {}, heroCompendiumOnline: false, heroCompendiumLoading: false, heroCompendiumError: '' };
+const state = { view: 'register', heroes: [], selected: [], roster: [], registrations: [], broadcast: null, isAdmin: false, adminStatus: 'all', heroFocus: '' };
 const tournament = createTournamentController({isAdmin:()=>state.isAdmin,getRegistrations:()=>state.registrations});
 const message = (id, text, type = 'ok') => { const el = $(id); el.textContent = text; el.className = `message ${type}`; };
 const errorText = (err) => {
@@ -49,53 +48,6 @@ function enableImageFallbacks() {
   }, true);
 }
 
-const heroKey = (name='') => String(name || '').trim().toLocaleLowerCase();
-function getHero(name) { return state.heroes.find(h => heroKey(h.name) === heroKey(name)); }
-function getHeroDetails(name) { return state.heroCompendium[heroKey(name)] || null; }
-function heroPortraitHTML(name) {
-  const detail = getHeroDetails(name);
-  const hero = getHero(name) || {name};
-  const sources = [detail?.portrait, ...heroImageSources(hero)].filter(Boolean);
-  const [url, ...alternates] = [...new Set(sources)];
-  return url ? `<img src="${esc(url)}" alt="${esc(name)}" loading="lazy" referrerpolicy="no-referrer" data-hero-image data-alternates="${esc(encodeURIComponent(JSON.stringify(alternates)))}">` : `<span>${esc(String(name || 'D').slice(0,2).toUpperCase())}</span>`;
-}
-function setHeroFocus(name) {
-  const next = name || state.selected[0] || '';
-  if (state.heroFocus === next) return;
-  state.heroFocus = next;
-  if (next && !state.heroCompendium[heroKey(next)]) state.heroCompendium[heroKey(next)] = fallbackProfile(next);
-  renderHeroDossier();
-  window.dispatchEvent(new CustomEvent('deadlock:focus-hero', {detail: {name: next}}));
-}
-function renderHeroDossier() {
-  const name = state.heroFocus || state.selected[0] || '';
-  const details = getHeroDetails(name);
-  $('heroSpotlightName').textContent = name || 'ВЫБЕРИ ГЕРОЯ';
-  $('heroSpotlightTag').textContent = details ? 'CITY ARCHIVE' : 'HERO INTEL';
-  $('heroSpotlightPortrait').innerHTML = name ? heroPortraitHTML(name) : '<span>D//</span>';
-  const playstyle = details?.playstyle || (name ? 'Описание загружается отдельно по кнопке. Выбрать героя можно без подключения к справочнику.' : 'Нажми на героя в каталоге, чтобы открыть его досье.');
-  const lore = details?.lore || (name ? 'Нажми «Загрузить описание». Если источник недоступен, открой справочник в новой вкладке.' : 'Предыстория и способности не влияют на регистрацию.');
-  $('heroSpotlightPlaystyle').textContent = playstyle;
-  $('heroSpotlightLore').textContent = lore;
-  const abilities = details?.abilities || [];
-  const loading = state.heroCompendiumLoading;
-  const error = !!state.heroCompendiumError;
-  $('heroAbilityList').innerHTML = abilities.length
-    ? abilities.map(a => `<article class="dc-ability-card"><div class="dc-ability-icon">${a.icon ? `<img src="${esc(a.icon)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<span>${esc(String(a.slot))}</span>`}</div><div class="dc-ability-copy"><div class="dc-ability-name"><b>${esc(a.name || `Способность ${a.slot}`)}</b><span>${esc(`SLOT ${a.slot}`)}</span></div><div class="dc-ability-desc">${esc(a.description || 'Описание способности временно недоступно.')}</div></div></article>`).join('')
-    : `<div class="dc-abilities-empty">${!name ? 'Выбери героя слева.' : loading ? 'Получаем сведения о способностях…' : error ? 'Источник способностей недоступен. Краткое описание героя уже показано выше.' : 'При наличии данных способности появятся после нажатия «Обновить данные».'}</div>`;
-  $('heroDossierStatus').textContent = !name
-    ? 'Нажми на карточку героя'
-    : loading ? 'Получаем актуальные данные…'
-    : error ? 'Краткий обзор доступен, API не отвечает'
-    : state.heroCompendiumOnline && abilities.length ? 'Актуальные игровые сведения' : 'Краткий обзор · без загрузки';
-  $('heroDossierRetry').hidden = true;
-  $('heroDossierFetch').disabled = !name || loading;
-  $('heroDossierFetch').textContent = loading ? 'ОБНОВЛЕНИЕ...' : 'ОБНОВИТЬ ДАННЫЕ ГЕРОЯ';
-  const heroSlug = encodeURIComponent(name.toLocaleLowerCase('en').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''));
-  $('heroDossierExternal').href = heroReferenceUrl(name || 'Deadlock');
-
-}
-
 function renderHeroes({resetScroll = false} = {}) {
   const grid = $('heroesGrid');
   const savedScroll = resetScroll ? 0 : grid.scrollTop;
@@ -113,6 +65,11 @@ function renderHeroes({resetScroll = false} = {}) {
       <span class="hero-name">${esc(h.name)}</span>${selected ? '<span class="hero-check">✓</span>' : ''}</button>`;
   }).join('') : '<div class="empty-mini">Ничего не найдено.</div>';
   grid.scrollTop = savedScroll;
+}
+function updateModelSelection() {
+  const name = state.heroFocus || state.selected[0] || '';
+  const label = $('modelSelectionLabel');
+  if (label) label.textContent = name ? `3D-просмотр: ${name}` : 'Выбери героя из списка ниже';
 }
 function getRosterForDemo() {
   return demo.getRegistrations().filter(r => r.status !== 'rejected').map(r => ({nickname: r.nickname}));
@@ -172,7 +129,7 @@ async function submitRegistration(event) {
       rows.unshift({id:crypto.randomUUID(), ...row, status:'pending', submitted_at: new Date().toISOString()});
       demo.saveRegistrations(rows);
     }
-    $('registerForm').reset(); $('hours').value = '0'; state.selected = []; renderHeroes(); setHeroFocus('');
+    $('registerForm').reset(); $('hours').value = '0'; state.selected = []; state.heroFocus = ''; renderHeroes(); updateModelSelection();
     message('registerMessage', 'Заявка успешно отправлена! Твой ник появится в списке участников.');
     await fetchRoster();
     if (state.isAdmin) await fetchRegistrations();
@@ -285,8 +242,15 @@ async function functionErrorText(error) {
   return code + (text || fallback);
 }
 async function requestSteamAvatar(registrationId) {
+  // Force the current authenticated session token: don't rely on cached
+  // default headers when the user has just signed in.
+  const {data:{session},error:sessionError}=await db.auth.getSession();
+  if(sessionError || !session?.access_token) throw new Error('Войди в панель организатора повторно.');
+  const {data:role, error:roleError}=await db.rpc('is_admin');
+  if(roleError || role!==true) throw new Error('Эта учётная запись не имеет роли администратора.');
   const {data, error} = await db.functions.invoke('steam-avatar', {
-    body: {registration_id: registrationId}
+    body: {registration_id: registrationId},
+    headers: {Authorization: `Bearer ${session.access_token}`}
   });
   if (error) throw new Error(await functionErrorText(error));
   if (!data?.ok) throw new Error(String(data?.error || 'Функция не подтвердила получение аватара.'));
@@ -365,33 +329,6 @@ async function copyOverlay(mode) {
   try { await navigator.clipboard.writeText(url); message('copyMessage', `Адрес скопирован: ${url}`); }
   catch { message('copyMessage', `Скопируй адрес вручную: ${url}`); }
 }
-let heroCompendiumAttempt = 0;
-async function reloadHeroCompendium() {
-  const targetName = state.heroFocus;
-  if (!targetName) return;
-  const attempt = ++heroCompendiumAttempt;
-  state.heroCompendiumLoading = true;
-  state.heroCompendiumError = '';
-  renderHeroDossier();
-  try {
-    const {profile, online, error} = await loadHeroProfile(targetName,{force:true});
-    if(attempt !== heroCompendiumAttempt) return;
-    state.heroCompendium[heroKey(targetName)] = profile || fallbackProfile(targetName);
-    state.heroCompendiumOnline = !!online;
-    state.heroCompendiumError = online ? '' : (error || 'Нет соединения с API.');
-  } catch (err) {
-    if(attempt !== heroCompendiumAttempt) return;
-    state.heroCompendium[heroKey(targetName)] ||= fallbackProfile(targetName);
-    state.heroCompendiumOnline = false;
-    state.heroCompendiumError = 'Не удалось получить актуальные данные.';
-  } finally {
-    if(attempt === heroCompendiumAttempt) {
-      state.heroCompendiumLoading = false;
-      renderHeroDossier();
-    }
-  }
-}
-
 async function init() {
   enableImageFallbacks();
   $('demoBanner').hidden = configured;
@@ -405,15 +342,19 @@ async function init() {
   $('heroesGrid').addEventListener('click', event => {
     const item = event.target.closest('[data-hero]'); if (!item) return;
     const name = item.dataset.hero;
+    state.heroFocus = name;
     if (state.selected.includes(name)) state.selected = state.selected.filter(n => n !== name);
     else if (state.selected.length < 3) state.selected.push(name);
-    else {
-      // Даже если уже выбрано 3 героя, можно читать досье других.
-      setHeroFocus(name);
-      return message('registerMessage', 'Можно выбрать максимум трёх героев. Досье доступно — сними один из текущих выборов, чтобы добавить этого героя.', 'error');
-    }
+    else { updateModelSelection(); return message('registerMessage', 'Можно выбрать максимум трёх героев. 3D-просмотр выбранного героя доступен отдельно.', 'error'); }
     renderHeroes();
-    setHeroFocus(name);
+    updateModelSelection();
+  });
+  $('openHero3D').addEventListener('click', () => {
+    const name = state.heroFocus || state.selected[0];
+    if (!name) return message('registerMessage','Сначала выбери героя, чтобы открыть 3D-просмотр.','error');
+    const url = new URL('./viewer.html', window.location.href);
+    url.searchParams.set('hero', name);
+    window.open(url.href, '_blank', 'noopener,noreferrer');
   });
 
   $('registerForm').addEventListener('submit', submitRegistration);
@@ -429,7 +370,7 @@ async function init() {
   // Сразу показываем выбор героев, не ожидая внешних API и CDN.
   state.heroes = FALLBACK_HEROES;
   renderHeroes();
-  renderHeroDossier();
+  updateModelSelection();
   window.dispatchEvent(new CustomEvent('deadlock:heroes',{detail:state.heroes}));
   $('heroLoadStatus').textContent = `${state.heroes.length} героев доступны сразу. Обновляем портреты...`;
   loadHeroes().then(({heroes, online}) => {
@@ -438,8 +379,7 @@ async function init() {
     state.heroes = [...heroes, ...selection.filter(h => !heroes.some(r => r.name === h.name))]
       .sort((a,b) => a.name.localeCompare(b.name, 'en'));
     renderHeroes();
-    renderHeroDossier();
-    window.dispatchEvent(new CustomEvent('deadlock:heroes',{detail:state.heroes}));
+      window.dispatchEvent(new CustomEvent('deadlock:heroes',{detail:state.heroes}));
     $('heroLoadStatus').textContent = online
       ? `Героев в каталоге: ${state.heroes.length}. Портреты обновлены.`
       : `Героев в каталоге: ${state.heroes.length}. API временно недоступен — выбор героев работает.`;
@@ -447,8 +387,6 @@ async function init() {
     $('heroLoadStatus').textContent = `Героев в каталоге: ${state.heroes.length}. Резервный список работает без API.`;
   });
 
-  $('heroDossierFetch').addEventListener('click', () => reloadHeroCompendium());
-  $('heroDossierRetry').addEventListener('click', () => reloadHeroCompendium());
 
   setView(location.hash.slice(1) || 'register', false);
   try {

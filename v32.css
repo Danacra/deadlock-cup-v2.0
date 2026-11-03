@@ -1,0 +1,39 @@
+/* v3.2 — restored Deadlock Cup charcoal / neon-lime theme.
+   Decorative geometry stays outside content flow. No portrait collages. */
+:root{--bg:#0A0A0A;--panel:#111411;--panel2:#171c15;--edge:#343e30;--muted:#a8b5a0;--white:#f2f5ec;--lime:#B6FF00}
+body{background:#0A0A0A!important;color:var(--white)!important}
+body::before{display:none!important}
+.header,.footer{background:#0a0d0afa}
+.container{max-width:1280px}
+.section-heading h2{max-width:100%;line-height:1.12}
+.nav-btn.active{color:#b6ff00}
+.dc-view-hero{overflow:hidden;min-height:210px;padding:clamp(26px,3vw,43px);border-left:4px solid var(--lime);background:radial-gradient(ellipse at 80% 40%,#263b1740,transparent 55%),linear-gradient(115deg,#151913,#0c0f0c)}
+.dc-view-hero::before{font-family:Rajdhani,sans-serif;opacity:.65;right:7%;letter-spacing:-.04em}
+.dc-view-hero::after{right:8%;animation:v32-rotate 32s linear infinite;border-style:dashed;opacity:.45}
+@keyframes v32-rotate{to{transform:translateY(-50%) rotate(360deg)}}
+.dc-view-hero .section-kicker,.dc-view-hero .section-heading{position:relative;z-index:3;width:min(800px,100%);margin:0}
+.dc-view-hero .section-kicker{margin-bottom:10px}
+.dc-view-hero .section-heading p{max-width:660px;margin:10px 0 0}
+.dc-view-hero .section-heading h2{font-size:clamp(32px,5vw,57px)}
+.dc-view-hero,.panel,.t-team-card,.t-admin-team{box-shadow:0 12px 35px #0004}
+.hero-banner{border-bottom:1px solid #364530;background:linear-gradient(105deg,#10150f,#090b09 65%)}
+.hero-right .hero-monogram{letter-spacing:-.06em;font-size:clamp(150px,24vw,260px);margin-right:0;color:#b6ff0007;-webkit-text-stroke:2px #b6ff002c}
+.hero-right .hero-ring{border-color:#b6ff002c}
+.hero-serial{opacity:.6}
+.info-panel,.info-quote,.t-placeholder{background:linear-gradient(140deg,#141d12,#10140f)}
+.registration-layout{grid-template-columns:minmax(0,1fr) minmax(280px,320px)}
+.sidebar{min-width:0}
+.v32-hero-tools{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:4px 0 18px;padding:12px 14px;background:#151c12;border:1px solid #405335}
+.v32-hero-tools .btn{min-height:41px;font-size:11px;color:var(--lime);border-color:#6c8b3e}
+.v32-hero-tools #modelSelectionLabel{font-size:11px;color:#b7c5ae;overflow-wrap:anywhere}
+.hero-card img{object-position:center 23%}
+.hero-card.selected{border-color:var(--lime)}
+.admin-toolbar{margin-top:0}
+.section-gap{margin-top:52px}
+.t-team-card,.t-admin-team,.t-match-card{min-width:0}
+.t-placeholder{margin-top:15px}
+.roster-panel,.admin-list-panel,.broadcast-panel{min-width:0}
+.footer-inner{gap:22px}
+@media(max-width:860px){.registration-layout{grid-template-columns:1fr}.sidebar{display:grid;grid-template-columns:1fr 1fr;gap:15px}}
+@media(max-width:570px){.sidebar{grid-template-columns:1fr}.dc-view-hero{padding:22px 18px;min-height:160px}.dc-view-hero::after{opacity:.17}.dc-view-hero::before{opacity:.24}.hero-right{opacity:.25}.v32-hero-tools{align-items:stretch;flex-direction:column}.v32-hero-tools .btn{width:100%}}
+@media(prefers-reduced-motion:reduce){.dc-view-hero::after{animation:none}}

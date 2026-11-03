@@ -50,39 +50,6 @@ body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;bac
 .hero-name{line-height:1.25!important;font-size:12px!important}
 .hero-load-status{padding-top:4px;line-height:1.5;color:#a8ba9d}
 
-/* New dossier: compact, readable, completely optional to registration. */
-.dc-dossier-panel{margin-top:20px;border:1px solid #45563b;background:radial-gradient(circle at 90% 10%,#b6ff0011,transparent 52%),linear-gradient(130deg,#151b12,#10140f);padding:20px;min-width:0}
-.dc-dossier-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;border-bottom:1px solid #4c583f;padding-bottom:13px;margin-bottom:14px}
-.dc-dossier-top h3{font-family:'Valve Occult Local',Rajdhani,Arial,sans-serif;font-size:24px;line-height:1.2;margin:5px 0 0;overflow-wrap:anywhere}
-.dc-dossier-pill{font:700 10px Manrope,sans-serif;white-space:normal;color:#c9ea92;border:1px solid #6a803f;padding:5px 7px;text-align:center}
-.dc-dossier-body{display:grid;grid-template-columns:85px 1fr;gap:13px;margin-bottom:16px;align-items:start}
-.dc-dossier-portrait{width:85px;height:115px;display:grid;place-items:center;background:radial-gradient(circle,#2a4c1e,#121a11);border:1px solid #48593b;overflow:hidden}
-.dc-dossier-portrait img{height:100%;width:100%;object-fit:cover;object-position:center 18%}
-.dc-dossier-portrait.portrait-missing::after{content:'ПОРТРЕТ';font:700 9px Manrope,sans-serif;color:#adc991}
-.dc-dossier-portrait span{font:700 22px Rajdhani,sans-serif;color:var(--lime)}
-.dc-dossier-copy p,.dc-dossier-lore{font-size:12px;line-height:1.65;margin:0 0 10px;color:#c7d4bd}
-.dc-dossier-lore{max-height:135px;overflow:auto;color:#9eaf97}
-.dc-dossier-abilities-head{border-top:1px solid #48593b;padding-top:13px;margin-bottom:12px;display:flex;align-items:start;justify-content:space-between;gap:10px}
-.dc-dossier-abilities-head span{font-weight:800;font-size:11px}
-.dc-hero-data-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;text-align:right}
-.dc-hero-data-actions small{font-size:10px;color:#aaba9b}
-.dc-hero-actions{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
-.dc-action{border:1px solid #6b854c;background:#24351b;color:#d9f7aa;padding:9px 10px;font:800 10px Manrope,sans-serif;line-height:1.4;text-align:center;cursor:pointer;min-width:0;flex:1}
-.dc-action-secondary{background:#161d15;border-color:#404c38;color:#bbc9b3}
-.dc-action:hover{border-color:var(--lime);color:var(--lime)}
-.dc-action:disabled{opacity:.5;cursor:default}
-.dc-abilities-list{display:grid;gap:9px}
-.dc-ability-card{display:grid;grid-template-columns:44px 1fr;gap:10px;background:#141b12;border:1px solid #36462f;padding:10px}
-.dc-ability-icon{width:44px;height:44px;display:grid;place-items:center;background:#22341c;border:1px solid #516842}
-.dc-ability-icon img{width:100%;height:100%;object-fit:contain}
-.dc-ability-icon span{font:800 17px Rajdhani,sans-serif;color:var(--lime)}
-.dc-ability-name{display:flex;justify-content:space-between;gap:10px;margin-bottom:5px;color:#f1f4e8}
-.dc-ability-name b{font-size:12px}.dc-ability-name span{font:800 9px Manrope,sans-serif;color:#91a584}
-.dc-ability-desc,.dc-abilities-empty{font-size:11px;line-height:1.65;color:#bac6b2;overflow-wrap:anywhere}
-.dc-abilities-empty{border:1px dashed #43533d;padding:12px}
-.dc-patron-names{display:flex;justify-content:space-between;gap:10px;border-top:1px solid #43503a;padding-top:12px;margin-top:12px;color:#899d7b;font:700 9px Manrope,sans-serif;letter-spacing:1px}
-.dc-dossier-retry{display:none!important}
-
 /* Team colors/logos/Steam profiles (preserve previous feature set). */
 .dc-steam-consent{display:flex;gap:10px;align-items:flex-start;margin:22px 0;padding:12px;border:1px solid #526443;background:#1a2516;color:#c6d2bf;font-size:11px;line-height:1.65}
 .dc-steam-consent input{width:17px;height:17px;flex:none;margin-top:3px;accent-color:var(--lime)}

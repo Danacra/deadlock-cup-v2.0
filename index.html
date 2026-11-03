@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css">
   <link rel="stylesheet" href="./stable-v3.css">
-  <link rel="stylesheet" href="./deadlock-theme.css">
+  <link rel="stylesheet" href="./v32.css">
 </head>
 <body>
   <div class="noise" aria-hidden="true"></div>
@@ -36,17 +36,13 @@
           <p>Твоя регистрация — первый шаг к матчу. Заполни анкету, выбери героев и присоединись к участникам турнира.</p>
           <div class="hero-actions"><button id="heroRegister" class="btn btn-primary">Подать заявку <span>↗</span></button><button id="heroRoster" class="btn btn-ghost">Список игроков <span>→</span></button></div>
         </div>
-        <div class="hero-right" aria-hidden="true"><div class="hero-ring ring-a"></div><div class="hero-ring ring-b"></div><div class="hero-ring ring-c"></div><div class="hero-monogram">D<span>//</span></div><div class="hero-serial">DLC / 001 — OPEN ENTRY</div><div class="dc-patron-seal" aria-hidden="true"><span>◆</span><span class="dc-patron-orbit">✧</span></div><div class="dc-feature-heroes" id="dcFeatureHeroes"></div><div class="dc-scene dc-scene-register" data-deadlock-scene="register" aria-hidden="true"></div></div>
+        <div class="hero-right" aria-hidden="true"><div class="hero-ring ring-a"></div><div class="hero-ring ring-b"></div><div class="hero-ring ring-c"></div><div class="hero-monogram">D<span>//</span></div><div class="hero-serial">DLC / 001 — OPEN ENTRY</div></div>
       </div>
       <div class="banner-bottom container"><span>NEW YORK · THE CURSED APPLE</span><span>REGISTRATION / ACTIVE</span><span>SCROLL TO CONTINUE ↓</span></div>
     </section>
 
     <div class="container content">
       <section id="view-register" class="view">
-        <div class="dc-archive-gallery">
-          <div class="dc-gallery-heading"><span>THE CITY IS WATCHING</span><strong>ГЕРОИ НОЧНОГО ГОРОДА</strong><small>ПОДБОРКА ПЕРСОНАЖЕЙ DEADLOCK / 2026</small></div>
-          <div class="dc-gallery-scenes" data-deadlock-scene="gallery" aria-label="Галерея героев"></div>
-        </div>
         <div class="section-kicker">01 / УЧАСТИЕ</div>
         <div class="section-heading"><div><h2>РЕГИСТРАЦИЯ<span class="dot">.</span></h2><p>Заполни форму. Публично отображается никнейм и назначенная организатором команда.</p></div><span class="section-numeral">01—03</span></div>
         <div class="registration-layout">
@@ -62,9 +58,10 @@
             </div>
             <label class="dc-steam-consent"><input type="checkbox" id="steamAvatarOptIn"><span>Разрешаю показывать мою публичную аватарку Steam рядом с ником на сайте и в составах команд. Ссылка на мой профиль не публикуется.</span></label>
             <div class="form-divider"></div>
-            <div class="panel-heading"><div class="step">02</div><div><h3>ТВОИ ГЕРОИ</h3><p>Выбери от 1 до 3 любимых героев. Нажми на карточку, чтобы открыть её досье — наведение ничего не переключает.</p></div></div>
+            <div class="panel-heading"><div class="step">02</div><div><h3>ТВОИ ГЕРОИ</h3><p>Выбери от 1 до 3 героев. Для просмотра 3D-модели открой отдельное окно.</p></div></div>
             <div class="hero-filter"><input id="heroSearch" type="search" placeholder="Найти героя..." aria-label="Найти героя"><span id="heroCounter">0 / 3 ВЫБРАНО</span></div>
             <div id="selectedHeroes" class="selected-heroes"></div>
+            <div class="v32-hero-tools"><button id="openHero3D" type="button" class="btn btn-outline">ОТКРЫТЬ ГЕРОЯ В 3D ↗</button><span id="modelSelectionLabel">Выбери героя из списка ниже</span></div>
             <div id="heroesGrid" class="heroes-grid" aria-live="polite"><div class="empty-mini">Загрузка героев...</div></div>
             <div id="heroLoadStatus" class="hero-load-status" role="status" aria-live="polite"></div>
             <div class="privacy-note"><span class="shield">◆</span><span><strong>Приватность анкеты.</strong> Публично видны твой ник, команда и её результаты; Steam-аватар — только при отдельном согласии. Discord, Steam, часы и любимые герои видны только администратору. Отправляя заявку, ты соглашаешься передать эти данные организатору турнира.</span></div>
@@ -73,17 +70,6 @@
           </form>
           <aside class="sidebar">
             <div class="info-panel"><div class="info-top"><span class="text-muted">СТАТУС СИСТЕМЫ</span><span class="small-green">● РЕГИСТРАЦИЯ ОТКРЫТА</span></div><div class="info-big" id="sideCount">00</div><div class="info-caption">ЗАРЕГИСТРИРОВАННЫХ ИГРОКОВ</div><div class="info-rule"></div><p>Список участников обновляется автоматически. Информация об анкетах остаётся у организатора.</p><button class="text-link" id="sideRoster">ПОСМОТРЕТЬ УЧАСТНИКОВ <span>↗</span></button></div>
-            <div class="dc-dossier-panel" id="heroDossierPanel">
-              <div class="dc-dossier-top"><div><span class="text-muted">HERO DOSSIER</span><h3 id="heroSpotlightName">ВЫБЕРИ ГЕРОЯ</h3></div><div class="dc-dossier-pill" id="heroSpotlightTag">LORE / SKILLS</div></div>
-              <div class="dc-dossier-body">
-                <div class="dc-dossier-portrait-wrap"><div class="dc-dossier-portrait" id="heroSpotlightPortrait"><span>D//</span></div></div>
-                <div class="dc-dossier-copy"><p id="heroSpotlightPlaystyle">Нажми на героя в каталоге, чтобы открыть игровое описание, предысторию и его способности.</p><div id="heroSpotlightLore" class="dc-dossier-lore">Краткое описание доступно сразу. За подробными данными сайт обращается к двум независимым игровым источникам.</div></div>
-              </div>
-              <div class="dc-dossier-abilities-head"><span>СПОСОБНОСТИ</span><div class="dc-hero-data-actions"><small id="heroDossierStatus" aria-live="polite">Ждём выбор героя…</small><button type="button" id="heroDossierRetry" class="dc-dossier-retry" hidden>↻ ПОВТОРИТЬ</button></div></div>
-              <div class="dc-hero-actions"><button id="heroDossierFetch" type="button" class="dc-action">ЗАГРУЗИТЬ ОПИСАНИЕ</button><a id="heroDossierExternal" class="dc-action dc-action-secondary" target="_blank" rel="noopener noreferrer" href="https://deadlock.io/en/heroes">СПРАВОЧНИК DEADLOCK WIKI ↗</a></div>
-              <div id="heroAbilityList" class="dc-abilities-list"><div class="dc-abilities-empty">Сначала выбери героя в каталоге слева.</div></div>
-              <div class="dc-patron-names"><span>THE HIDDEN KING</span><span>THE ARCHMOTHER</span></div>
-            </div>
             <div class="info-quote"><span>«</span><p>ОДИН ТУРНИР.<br>МНОЖЕСТВО СОПЕРНИКОВ.<br><em>ОДИН ПОБЕДИТЕЛЬ.</em></p><div>DEADLOCK CUP / 2026</div></div>
           </aside>
         </div>
@@ -91,7 +77,6 @@
 
       <section id="view-roster" class="view dc-decorated-view" hidden>
         <div class="dc-view-hero dc-view-hero-roster">
-          <div class="dc-scene dc-scene-roster" data-deadlock-scene="roster" aria-hidden="true"></div>
         
         <div class="section-kicker">02 / УЧАСТНИКИ</div>
         <div class="section-heading"><div><h2>СПИСОК ИГРОКОВ<span class="dot">.</span></h2><p>Публично доступны никнеймы и аватары только при согласии участника. Анкеты скрыты.</p></div><span class="section-numeral">02—03</span></div>
@@ -101,7 +86,6 @@
 
       <section id="view-teams" class="view dc-decorated-view" hidden>
         <div class="dc-view-hero dc-view-hero-teams">
-          <div class="dc-scene dc-scene-teams" data-deadlock-scene="teams" aria-hidden="true"></div>
         
         <div class="section-kicker">03 / КОМАНДЫ</div>
         <div class="section-heading"><div><h2>КОМАНДЫ<span class="dot">.</span></h2><p>Актуальные составы по 6 человек. Организатор может менять их в любой момент.</p></div><span class="section-numeral" id="publicTeamCount">0</span></div>
@@ -110,7 +94,6 @@
       </section>
       <section id="view-bracket" class="view dc-decorated-view" hidden>
         <div class="dc-view-hero dc-view-hero-bracket">
-          <div class="dc-scene dc-scene-bracket" data-deadlock-scene="bracket" aria-hidden="true"></div>
         
         <div class="section-kicker">04 / ТУРНИР</div>
         <div class="section-heading"><div><h2>ТУРНИРНАЯ СЕТКА<span class="dot">.</span></h2><p>Этапы, счёт и продвижение победителей обновляются автоматически.</p></div></div>
@@ -119,7 +102,6 @@
       </section>
       <section id="view-admin" class="view dc-decorated-view" hidden>
         <div class="dc-view-hero dc-view-hero-admin">
-          <div class="dc-scene dc-scene-admin" data-deadlock-scene="admin" aria-hidden="true"></div>
         
         <div class="section-kicker">03 / УПРАВЛЕНИЕ</div>
         <div class="section-heading"><div><h2>ПАНЕЛЬ ТУРНИРА<span class="dot">.</span></h2><p>Закрытая зона организатора. Доступ по Supabase Auth и роли администратора.</p></div><span class="section-numeral">03—03</span></div>
@@ -180,7 +162,6 @@
       }
     }, 8000);
   </script>
-  <script type="module" src="./city-gallery.js"></script>
   <script type="module" src="./app.js"></script>
 </body>
 </html>

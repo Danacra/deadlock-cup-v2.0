@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0A0A0A"><title>Deadlock Cup — 3D-просмотр</title>
+<link rel="stylesheet" href="./viewer.css">
+</head>
+<body>
+<header class="viewer-bar"><a href="./index.html#register">D// <span>DEADLOCK CUP</span></a><span>3D-ПРОСМОТР ГЕРОЕВ</span><button type="button" id="closeViewer">ЗАКРЫТЬ ×</button></header>
+<main class="viewer-layout">
+ <section class="viewer-stage" aria-label="3D-сцена">
+  <div class="viewer-stage-top"><span id="heroIdLabel">HERO / 001</span><strong id="heroName">ВЫБЕРИ ГЕРОЯ</strong></div>
+  <div id="modelStage" class="model-stage">
+   <div class="empty-model" id="emptyModel"><div class="empty-sigil">D//</div><h2>3D-МОДЕЛЬ ЕЩЁ НЕ ПОДКЛЮЧЕНА</h2><p>Окно готово к загрузке GLB/GLTF. Нужен прямой файл модели, а не обычная ссылка на веб-страницу.</p></div>
+  </div>
+  <div class="stage-caption">ВРАЩЕНИЕ: МЫШЬ · МАСШТАБ: КОЛЕСО · ИСПОЛЬЗУЕТСЯ ВНЕШНИЙ 3D-ПРОСМОТРЩИК</div>
+ </section>
+ <aside class="viewer-controls"><span class="viewer-eyebrow">HERO ARCHIVE</span><h1>ПРОСМОТР<br><em>ПЕРСОНАЖЕЙ.</em></h1><p>Выбери героя, чтобы открыть его 3D-модель. Модели подключаются отдельно — они не входят в этот архив.</p>
+  <label for="heroPicker">ПЕРСОНАЖ</label><select id="heroPicker"></select>
+  <label for="modelFile">ЛОКАЛЬНАЯ МОДЕЛЬ ДЛЯ ПРОВЕРКИ</label><input type="file" id="modelFile" accept=".glb,model/gltf-binary">
+  <p class="viewer-help">Можно проверить свой файл `.glb` без публикации. Он останется только в этом браузере. Чтобы модель видели все, добавь файл на сайт и укажи путь в <code>models.json</code>.</p>
+  <div class="viewer-action-status" id="viewerStatus" role="status" aria-live="polite">Ищу подключённую модель...</div>
+  <a href="./index.html#register" class="viewer-back">← ВЕРНУТЬСЯ К РЕГИСТРАЦИИ</a>
+ </aside>
+</main>
+<script type="module" src="./viewer.js"></script>
+</body>
+</html>
