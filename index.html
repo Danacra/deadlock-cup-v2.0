@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0A0A0A">
+  <meta name="description" content="Deadlock Cup — регистрация участников турнира и информационный центр.">
+  <title>DEADLOCK CUP · Регистрация</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./stable-v3.css">
+</head>
+<body>
+  <div class="noise" aria-hidden="true"></div>
+  <header class="header">
+    <a class="brand" href="./index.html" aria-label="Deadlock Cup — главная"><span class="brand-mark">D<span>//</span></span><span class="brand-word">DEADLOCK <b>CUP</b><small>TOURNAMENT SYSTEM</small></span></a>
+    <nav class="nav" aria-label="Разделы сайта">
+      <button class="nav-btn active" data-view="register">Регистрация</button>
+      <button class="nav-btn" data-view="roster">Участники <span id="navCount">0</span></button>
+      <button class="nav-btn" data-view="teams">Команды</button>
+      <button class="nav-btn" data-view="bracket">Сетка</button>
+      <button class="nav-btn" data-view="admin">Организатор <span class="lock">↗</span></button>
+    </nav>
+    <div class="header-label"><span class="pulse"></span> LIVE REGISTRATION</div>
+  </header>
+  <div id="demoBanner" class="demo-banner" hidden>ДЕМОРЕЖИМ · данные сохраняются только в этом браузере. Для общего сайта подключите Supabase по README.md.</div>
+
+  <main>
+    <section class="hero-banner" id="pageIntro">
+      <div class="banner-inner container">
+        <div class="hero-left">
+          <div class="eyebrow"><span class="eyebrow-line"></span> COMMUNITY TOURNAMENT / 2026</div>
+          <h1>ВСТУПАЙ<br>В <em>ИГРУ.</em></h1>
+          <p>Твоя регистрация — первый шаг к матчу. Заполни анкету, выбери героев и присоединись к участникам турнира.</p>
+          <div class="hero-actions"><button id="heroRegister" class="btn btn-primary">Подать заявку <span>↗</span></button><button id="heroRoster" class="btn btn-ghost">Список игроков <span>→</span></button></div>
+        </div>
+        <div class="hero-right" aria-hidden="true"><div class="hero-ring ring-a"></div><div class="hero-ring ring-b"></div><div class="hero-ring ring-c"></div><div class="hero-monogram">D<span>//</span></div><div class="hero-serial">DLC / 001 — OPEN ENTRY</div><div class="dc-patron-seal" aria-hidden="true"><span>◆</span><span class="dc-patron-orbit">✧</span></div><div class="dc-feature-heroes" id="dcFeatureHeroes"></div></div>
+      </div>
+      <div class="banner-bottom container"><span>OPEN QUALIFIERS</span><span>REGISTRATION / ACTIVE</span><span>SCROLL TO CONTINUE ↓</span></div>
+    </section>
+
+    <div class="container content">
+      <section id="view-register" class="view">
+        <div class="section-kicker">01 / УЧАСТИЕ</div>
+        <div class="section-heading"><div><h2>РЕГИСТРАЦИЯ<span class="dot">.</span></h2><p>Заполни форму. Публично отображается никнейм и назначенная организатором команда.</p></div><span class="section-numeral">01—03</span></div>
+        <div class="registration-layout">
+          <form id="registerForm" class="panel form-panel">
+            <div class="panel-heading"><div class="step">01</div><div><h3>ДАННЫЕ ИГРОКА</h3><p>Контакты увидит только организатор</p></div></div>
+            <div class="field-grid">
+              <label class="field"><span>Игровой ник <b>*</b></span><input id="nickname" required autocomplete="off" minlength="2" maxlength="32" placeholder="Твой ник в Deadlock"></label>
+              <label class="field"><span>Discord <b>*</b></span><input id="discord" required autocomplete="off" minlength="2" maxlength="100" placeholder="username"></label>
+              <label class="field full"><span>Steam / ссылка на профиль <small>необязательно</small></span><input id="steam" type="text" maxlength="200" placeholder="https://steamcommunity.com/id/..."></label>
+              <label class="field"><span>Часы в Deadlock</span><input id="hours" type="number" min="0" max="10000" step="1" value="0" inputmode="numeric"></label>
+              <label class="field"><span>Регион игры</span><select id="region"><option value="EU">Европа (EU)</option><option value="NA">Северная Америка (NA)</option><option value="ASIA">Азия (ASIA)</option><option value="OTHER">Другой</option></select></label>
+              <label class="field full"><span>Комментарий организатору <small>необязательно</small></span><textarea id="notes" maxlength="800" rows="3" placeholder="Предпочтительная роль, опыт на турнирах, доступность и т.д."></textarea></label>
+            </div>
+            <label class="dc-steam-consent"><input type="checkbox" id="steamAvatarOptIn"><span>Разрешаю показывать мою публичную аватарку Steam рядом с ником на сайте и в составах команд. Ссылка на мой профиль не публикуется.</span></label>
+            <div class="form-divider"></div>
+            <div class="panel-heading"><div class="step">02</div><div><h3>ТВОИ ГЕРОИ</h3><p>Выбери от 1 до 3 любимых героев. Нажми на карточку, чтобы открыть её досье — наведение ничего не переключает.</p></div></div>
+            <div class="hero-filter"><input id="heroSearch" type="search" placeholder="Найти героя..." aria-label="Найти героя"><span id="heroCounter">0 / 3 ВЫБРАНО</span></div>
+            <div id="selectedHeroes" class="selected-heroes"></div>
+            <div id="heroesGrid" class="heroes-grid" aria-live="polite"><div class="empty-mini">Загрузка героев...</div></div>
+            <div id="heroLoadStatus" class="hero-load-status" role="status" aria-live="polite"></div>
+            <div class="privacy-note"><span class="shield">◆</span><span><strong>Приватность анкеты.</strong> Публично видны твой ник, команда и её результаты; Steam-аватар — только при отдельном согласии. Discord, Steam, часы и любимые герои видны только администратору. Отправляя заявку, ты соглашаешься передать эти данные организатору турнира.</span></div>
+            <button id="registerSubmit" class="btn btn-primary btn-wide" type="submit">ОТПРАВИТЬ ЗАЯВКУ <span>↗</span></button>
+            <div id="registerMessage" class="message" role="status" aria-live="polite"></div>
+          </form>
+          <aside class="sidebar">
+            <div class="info-panel"><div class="info-top"><span class="text-muted">СТАТУС СИСТЕМЫ</span><span class="small-green">● РЕГИСТРАЦИЯ ОТКРЫТА</span></div><div class="info-big" id="sideCount">00</div><div class="info-caption">ЗАРЕГИСТРИРОВАННЫХ ИГРОКОВ</div><div class="info-rule"></div><p>Список участников обновляется автоматически. Информация об анкетах остаётся у организатора.</p><button class="text-link" id="sideRoster">ПОСМОТРЕТЬ УЧАСТНИКОВ <span>↗</span></button></div>
+            <div class="dc-dossier-panel" id="heroDossierPanel">
+              <div class="dc-dossier-top"><div><span class="text-muted">HERO DOSSIER</span><h3 id="heroSpotlightName">ВЫБЕРИ ГЕРОЯ</h3></div><div class="dc-dossier-pill" id="heroSpotlightTag">LORE / SKILLS</div></div>
+              <div class="dc-dossier-body">
+                <div class="dc-dossier-portrait-wrap"><div class="dc-dossier-portrait" id="heroSpotlightPortrait"><span>D//</span></div></div>
+                <div class="dc-dossier-copy"><p id="heroSpotlightPlaystyle">Нажми на героя в каталоге, чтобы открыть игровое описание, предысторию и его способности.</p><div id="heroSpotlightLore" class="dc-dossier-lore">Официальные тексты будут подгружены из игровых данных Deadlock. Если внешний источник временно недоступен, выбор героев всё равно останется рабочим.</div></div>
+              </div>
+              <div class="dc-dossier-abilities-head"><span>СПОСОБНОСТИ</span><div class="dc-hero-data-actions"><small id="heroDossierStatus" aria-live="polite">Ждём выбор героя…</small><button type="button" id="heroDossierRetry" class="dc-dossier-retry" hidden>↻ ПОВТОРИТЬ</button></div></div>
+              <div class="dc-hero-actions"><button id="heroDossierFetch" type="button" class="dc-action">ЗАГРУЗИТЬ ОПИСАНИЕ</button><a id="heroDossierExternal" class="dc-action dc-action-secondary" target="_blank" rel="noopener noreferrer" href="https://deadlock.io/en/heroes">ОТКРЫТЬ СПРАВОЧНИК ↗</a></div>
+              <div id="heroAbilityList" class="dc-abilities-list"><div class="dc-abilities-empty">Сначала выбери героя в каталоге слева.</div></div>
+              <div class="dc-patron-names"><span>THE HIDDEN KING</span><span>THE ARCHMOTHER</span></div>
+            </div>
+            <div class="info-quote"><span>«</span><p>ОДИН ТУРНИР.<br>МНОЖЕСТВО СОПЕРНИКОВ.<br><em>ОДИН ПОБЕДИТЕЛЬ.</em></p><div>DEADLOCK CUP / 2026</div></div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="view-roster" class="view dc-decorated-view" hidden>
+        <div class="dc-view-hero dc-view-hero-roster">
+        
+        <div class="section-kicker">02 / УЧАСТНИКИ</div>
+        <div class="section-heading"><div><h2>СПИСОК ИГРОКОВ<span class="dot">.</span></h2><p>Публично доступны никнеймы и аватары только при согласии участника. Анкеты скрыты.</p></div><span class="section-numeral">02—03</span></div>
+        </div>
+        <div class="panel roster-panel"><div class="roster-head"><div><span class="text-muted">REGISTERED PLAYERS</span><h3><span id="rosterCount">0</span> УЧАСТНИКОВ</h3></div><input id="rosterSearch" class="roster-search" type="search" placeholder="Поиск по нику..."></div><div id="rosterGrid" class="roster-grid"></div><div class="roster-foot">Никнеймы и принадлежность к команде доступны публично. Контакты и анкеты скрыты.</div></div>
+      </section>
+
+      <section id="view-teams" class="view dc-decorated-view" hidden>
+        <div class="dc-view-hero dc-view-hero-teams">
+        
+        <div class="section-kicker">03 / КОМАНДЫ</div>
+        <div class="section-heading"><div><h2>КОМАНДЫ<span class="dot">.</span></h2><p>Актуальные составы по 6 человек. Организатор может менять их в любой момент.</p></div><span class="section-numeral" id="publicTeamCount">0</span></div>
+        </div>
+        <div id="teamsPublicGrid" class="t-public-teams"><div class="t-placeholder">Загрузка составов...</div></div>
+      </section>
+      <section id="view-bracket" class="view dc-decorated-view" hidden>
+        <div class="dc-view-hero dc-view-hero-bracket">
+        
+        <div class="section-kicker">04 / ТУРНИР</div>
+        <div class="section-heading"><div><h2>ТУРНИРНАЯ СЕТКА<span class="dot">.</span></h2><p>Этапы, счёт и продвижение победителей обновляются автоматически.</p></div></div>
+        </div>
+        <div id="bracketPublic"><div class="t-placeholder">Загрузка турнирной сетки...</div></div>
+      </section>
+      <section id="view-admin" class="view dc-decorated-view" hidden>
+        <div class="dc-view-hero dc-view-hero-admin">
+        
+        <div class="section-kicker">03 / УПРАВЛЕНИЕ</div>
+        <div class="section-heading"><div><h2>ПАНЕЛЬ ТУРНИРА<span class="dot">.</span></h2><p>Закрытая зона организатора. Доступ по Supabase Auth и роли администратора.</p></div><span class="section-numeral">03—03</span></div>
+        </div>
+        <div id="adminLogin" class="panel login-panel">
+          <div class="login-icon">⌑</div><h3>ВХОД ДЛЯ ОРГАНИЗАТОРА</h3><p>Авторизуйся с учётной записью администратора, созданной в Supabase.</p>
+          <form id="loginForm" class="login-form"><label class="field"><span>E-mail</span><input id="loginEmail" type="email" required autocomplete="email" placeholder="admin@example.com"></label><label class="field"><span>Пароль</span><input id="loginPassword" type="password" required autocomplete="current-password" placeholder="••••••••"></label><button type="submit" class="btn btn-primary btn-wide">ВОЙТИ <span>↗</span></button></form>
+          <div id="loginMessage" class="message" aria-live="polite"></div>
+        </div>
+        <div id="adminDashboard" hidden>
+          <div class="admin-toolbar"><div><span class="text-muted">CONTROL CENTER / PRIVATE</span><h3>УПРАВЛЕНИЕ СИСТЕМОЙ</h3></div><div class="toolbar-actions"><button class="btn btn-outline" id="exportJson">Экспорт JSON ↓</button><button class="btn btn-outline" id="exportCsv">Экспорт CSV ↓</button><button class="btn btn-outline" id="logout">Выйти ↗</button></div></div>
+          <div class="admin-metrics"><div class="metric"><span>ВСЕ ЗАЯВКИ</span><strong id="metricAll">0</strong></div><div class="metric"><span>ОЖИДАЮТ</span><strong id="metricPending">0</strong></div><div class="metric"><span>ПРИНЯТЫ</span><strong id="metricApproved">0</strong></div><div class="metric"><span>ОТКЛОНЕНЫ</span><strong id="metricRejected">0</strong></div></div>
+          <section id="tournamentAdmin" class="t-admin-section">
+            <div class="section-kicker section-gap">ROSTER / TEAMS</div>
+            <div class="section-heading compact"><div><h2>СОСТАВЫ КОМАНД<span class="dot">.</span></h2><p>Создавай команды, переносись между ростерами перетаскиванием или через меню. Только принятые игроки.</p></div></div>
+            <div class="t-admin-topbar panel"><form id="createTeamForm" class="t-team-create"><label class="field"><span>Название новой команды</span><input id="newTeamName" placeholder="Например: HEALING RITE" minlength="2" maxlength="36" required></label><button class="btn btn-primary" type="submit">+ КОМАНДА</button></form><div class="t-team-summary"><strong id="adminTeamCount">0</strong><span>КОМАНД</span><small id="tournamentPlayerStats">0 В СОСТАВАХ / 0 В РЕЗЕРВЕ</small></div></div>
+            <div id="unassignedDropzone" class="panel t-reserve"><div class="t-reserve-heading"><div><strong>РЕЗЕРВ ИГРОКОВ</strong><small>Здесь все принятые игроки без команды. Перенеси карточку в нужный ростер.</small></div><span>↓ DROP HERE</span></div><div id="unassignedPlayers" class="t-player-pool"></div></div>
+            <div id="tournamentRosterMessage" class="message t-roster-message" role="status" aria-live="polite"></div>
+            <div id="dcTeamEditor" class="panel dc-team-editor" hidden>
+              <div class="dc-team-editor-title"><strong>ОФОРМЛЕНИЕ КОМАНДЫ — <span id="dcEditingName"></span></strong><button type="button" id="dcCloseEditor" class="action-btn">× ЗАКРЫТЬ</button></div>
+              <form id="dcTeamEditorForm" class="dc-team-editor-form">
+                <label class="field"><span>ЦВЕТ КОМАНДЫ</span><input type="color" id="dcTeamColor" value="#B6FF00" aria-label="Выбери цвет команды"></label>
+                <label class="field"><span>ЭМБЛЕМА — PNG / JPEG / WEBP, ДО 2 МБ</span><input type="file" id="dcTeamLogoFile" accept="image/png,image/jpeg,image/webp"></label>
+                <button type="submit" class="btn btn-primary">СОХРАНИТЬ ОФОРМЛЕНИЕ</button>
+                <button type="button" class="btn btn-outline" id="dcClearTeamLogo">УБРАТЬ ЭМБЛЕМУ</button>
+              </form><div id="dcTeamEditorMessage" class="message" role="status" aria-live="polite"></div>
+            </div>
+            <div id="adminTeamsGrid" class="t-admin-teams"></div>
+            <div class="section-kicker section-gap">BRACKET / CONTROL</div>
+            <div class="section-heading compact"><div><h2>РЕДАКТОР СЕТКИ<span class="dot">.</span></h2><p>Олимпийская система с автоматическим переходом победителей. Пересоздание сетки стирает старые результаты.</p></div></div>
+            <div class="t-bracket-toolbar panel"><label class="field"><span>Порядок посева</span><select id="seedSort"><option value="alphabetical">По алфавиту</option><option value="random">Случайный</option></select></label><button class="btn btn-primary" id="generateBracket" type="button">СФОРМИРОВАТЬ СЕТКУ ↗</button><button class="btn btn-outline" id="clearBracket" type="button">ОЧИСТИТЬ СЕТКУ</button><button class="btn btn-outline" id="stopOnAir" type="button">СКРЫТЬ МАТЧ В OBS</button></div>
+            <div id="tournamentMessage" class="message" role="status" aria-live="polite"></div>
+            <div id="adminBracket"></div>
+            <div id="tournamentMigrationNotice" class="message error" hidden></div>
+          </section>
+          <div class="panel admin-list-panel"><div class="admin-list-header"><div><h3>АНКЕТЫ УЧАСТНИКОВ</h3><p>Все поля доступны только тебе</p></div><div class="filters"><select id="adminStatusFilter"><option value="all">Все статусы</option><option value="pending">Ожидают</option><option value="approved">Приняты</option><option value="rejected">Отклонены</option></select><input id="adminSearch" type="search" placeholder="Поиск ника / Discord..."></div></div><div id="adminSyncMessage" class="message" role="status" aria-live="polite"></div><div id="adminRows" class="admin-rows"></div></div>
+          <div class="section-kicker section-gap">OBS / BROADCAST</div><div class="section-heading compact"><div><h2>ТРАНСЛЯЦИЯ<span class="dot">.</span></h2><p>Меняй счёт и ники в панели — оверлей обновится в OBS автоматически.</p></div></div>
+          <div class="broadcast-layout">
+            <form class="panel broadcast-panel" id="broadcastForm"><div class="panel-heading"><div class="step">●</div><div><h3>ТАБЛО МАТЧА</h3><p>Публикуются только ники и счёт, без личных анкет</p></div></div>
+              <label class="field"><span>Раунд / этап</span><input id="roundLabel" maxlength="80" placeholder="ПОЛУФИНАЛ · BO3"></label>
+              <div class="field-grid"><label class="field"><span>Игрок слева</span><select id="leftPlayer"></select></label><label class="field"><span>Игрок справа</span><select id="rightPlayer"></select></label><label class="field"><span>Счёт слева</span><input id="scoreLeft" type="number" min="0" max="99" value="0"></label><label class="field"><span>Счёт справа</span><input id="scoreRight" type="number" min="0" max="99" value="0"></label></div>
+              <label class="switch-label"><input id="broadcastVisible" type="checkbox" checked><span>Показывать матч в OBS</span></label>
+              <button class="btn btn-primary btn-wide" type="submit">СОХРАНИТЬ ТАБЛО <span>↗</span></button><div class="message" id="broadcastMessage" aria-live="polite"></div>
+            </form>
+            <div class="panel obs-panel"><h3>ИСТОЧНИКИ ДЛЯ OBS</h3><p>Добавь «Браузер» в OBS и вставь адрес соответствующего оверлея.</p><div class="overlay-item"><div><b>01 / Счёт матча</b><small>Прозрачное табло • 1920×1080</small></div><button class="mini-btn" data-copy-overlay="match">КОПИРОВАТЬ ↗</button></div><div class="overlay-item"><div><b>02 / Список участников</b><small>Сетка ников • 1920×1080</small></div><button class="mini-btn" data-copy-overlay="roster">КОПИРОВАТЬ ↗</button></div><div class="overlay-item"><div><b>03 / Нижняя плашка</b><small>Ники текущей пары • 1920×1080</small></div><button class="mini-btn" data-copy-overlay="lowerthird">КОПИРОВАТЬ ↗</button></div><div class="overlay-item"><div><b>04 / Командный матч</b><small>Выбранный из сетки матч • 1920×1080</small></div><button class="mini-btn" data-copy-overlay="teams">КОПИРОВАТЬ ↗</button></div><div class="obs-foot">Оверлеи получают только данные, разрешённые к публичному показу.</div><div id="copyMessage" class="message" aria-live="polite"></div></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+  <footer class="footer"><div class="container footer-inner"><div class="brand-word">DEADLOCK <b>CUP</b><small>COMMUNITY TOURNAMENT</small></div><span>НЕОФИЦИАЛЬНЫЙ ТУРНИР · НЕ СВЯЗАН С VALVE</span><span>DESIGNED FOR THE ARENA © 2026</span></div></footer>
+  <script>
+    // Даже если JavaScript-модуль не загрузится, не оставляем бесконечный спиннер.
+    setTimeout(() => {
+      const grid = document.getElementById('heroesGrid');
+      if (grid && grid.textContent.includes('Загрузка героев')) {
+        grid.innerHTML = '<div class="empty-mini">Не удалось запустить каталог. Нажми Ctrl+F5; если проблема останется — проверь Console (F12) и доступность app.js / db.js.</div>';
+      }
+    }, 8000);
+  </script>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

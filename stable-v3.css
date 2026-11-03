@@ -1,0 +1,125 @@
+/* Deadlock Cup — stable rebuild. The interface is deliberately independent of decorative JS. */
+@font-face{font-family:'Valve Occult Local';src:url('./ValveOccult-SemiBold.ttf') format('truetype');font-display:swap}
+:root{--bg:#090b09;--panel:#141713;--panel2:#1a2016;--edge:#333d2e;--muted:#a7b1a0;--white:#eef3e6;--lime:#B6FF00;--accent:#c3a676}
+body{background:radial-gradient(circle at 76% 8%,#23371330,transparent 32%),#0A0A0A;color:var(--white)}
+body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(90deg,transparent 49.8%,#b6ff0008 50%,transparent 50.2%),repeating-linear-gradient(0deg,transparent 0 72px,#d9ff9f07 73px 74px);opacity:.8}
+.container{width:min(1280px,calc(100% - 52px))}
+.header{padding:0 max(26px,calc((100vw - 1280px)/2));border-bottom:1px solid #3c4535;min-height:84px;height:auto}
+.brand-word{font-family:'Valve Occult Local',Rajdhani,Arial,sans-serif}
+.brand-word b,.section-kicker{color:var(--lime)}
+.nav{margin:0 auto}.nav-btn{padding:28px 14px 25px;white-space:nowrap}
+.content{padding-top:44px;padding-bottom:80px}
+.view{min-width:0}
+.view .section-kicker{letter-spacing:2px;display:block;font-size:12px;line-height:1.4;margin-bottom:12px}
+.section-heading{align-items:flex-start;gap:16px;margin-bottom:25px;position:relative;z-index:2}
+.section-heading h2{font-family:'Valve Occult Local',Rajdhani,Arial,sans-serif;font-weight:700;font-size:clamp(32px,4vw,58px);letter-spacing:0;line-height:1.12;overflow-wrap:anywhere}
+.section-heading p{line-height:1.8;color:#b7c2ae;font-size:13px;max-width:780px}
+.section-numeral{display:none!important}
+.panel,.roster-entry,.t-team-card,.t-admin-team,.t-match-card{box-shadow:0 8px 28px #0003;border-color:#3b4535}
+.form-panel,.roster-panel,.admin-list-panel,.broadcast-panel,.obs-panel{padding:clamp(22px,3vw,32px)}
+.panel-heading h3,.admin-toolbar h3,.roster-head h3{line-height:1.2}
+.btn,.mini-btn,.action-btn{transition:transform .15s,border-color .15s,background .15s}
+.btn:hover,.mini-btn:hover,.action-btn:hover{transform:translateY(-1px)}
+.btn:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--lime);outline-offset:3px}
+.field>span,.roster-foot{line-height:1.55;color:#b1bfa9}
+.message{overflow-wrap:anywhere;line-height:1.6}
+.message.error{color:#ffaaaa}
+.field input,.field select,.field textarea{background:#0b0e0a}
+
+/* Stable atmospheric section banner — no 3D/WebGL dependencies. */
+.dc-view-hero{position:relative;isolation:isolate;border:1px solid #39452e;background:linear-gradient(110deg,#141b10 0%,#12170e 42%,#11170d 78%,#171c10);padding:34px clamp(20px,3vw,42px) 30px;margin-bottom:24px;min-height:204px;overflow:hidden}
+.dc-view-hero::before{content:'D//';position:absolute;right:9%;top:50%;transform:translateY(-50%);color:#b6ff0011;-webkit-text-stroke:1px #b6ff002a;font:800 clamp(100px,13vw,190px)/1 Rajdhani,Arial,sans-serif;pointer-events:none}
+.dc-view-hero::after{content:'';position:absolute;width:260px;height:260px;right:12%;top:50%;border:2px solid #b6ff0032;border-radius:50%;transform:translateY(-50%);box-shadow:0 0 0 24px #b6ff000a,0 0 0 52px #b6ff0005;pointer-events:none;animation:dc-stable-spin 24s linear infinite}
+@keyframes dc-stable-spin{to{transform:translateY(-50%) rotate(360deg)}}
+.dc-view-hero .section-kicker,.dc-view-hero .section-heading{position:relative;z-index:1}
+.dc-view-hero .section-heading{margin:0}
+.dc-view-hero .section-heading h2{text-shadow:0 4px 20px #000c}
+.dc-view-hero .section-heading p{color:#bbc9af}
+.dc-view-hero-bracket{background:linear-gradient(110deg,#1c2116,#111810 65%,#121914)}
+.dc-view-hero-teams{background:linear-gradient(110deg,#172010,#12180e 65%,#121914)}
+.dc-view-hero-admin{background:linear-gradient(110deg,#1b1c12,#131710 65%,#111712)}
+
+/* Hero selection: old portraits, controlled fallback and no hover-driven switching */
+.hero-filter{gap:10px;align-items:start}.heroes-grid{max-height:490px;gap:10px}
+.hero-card{min-height:152px;background:linear-gradient(140deg,#22331b,#141b13);border:1px solid #414d37}
+.hero-card img{height:114px;object-fit:cover;object-position:center 22%;background:linear-gradient(150deg,#253b1a,#111611)}
+.hero-card .image-fallback{background:radial-gradient(circle at 50% 26%,#3d6022,#192916 65%,#101811);font-family:'Valve Occult Local',Rajdhani,Arial,sans-serif;font-size:24px;letter-spacing:1px}
+.hero-card.no-image .image-fallback{display:flex}
+.hero-card.selected{outline:1px solid var(--lime);outline-offset:0}
+.hero-card.selected::after{content:'ВЫБРАН';position:absolute;top:5px;left:5px;background:var(--lime);color:#101509;font:800 9px Manrope,sans-serif;padding:3px 5px}
+.hero-name{line-height:1.25!important;font-size:12px!important}
+.hero-load-status{padding-top:4px;line-height:1.5;color:#a8ba9d}
+
+/* New dossier: compact, readable, completely optional to registration. */
+.dc-dossier-panel{margin-top:20px;border:1px solid #45563b;background:radial-gradient(circle at 90% 10%,#b6ff0011,transparent 52%),linear-gradient(130deg,#151b12,#10140f);padding:20px;min-width:0}
+.dc-dossier-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;border-bottom:1px solid #4c583f;padding-bottom:13px;margin-bottom:14px}
+.dc-dossier-top h3{font-family:'Valve Occult Local',Rajdhani,Arial,sans-serif;font-size:24px;line-height:1.2;margin:5px 0 0;overflow-wrap:anywhere}
+.dc-dossier-pill{font:700 10px Manrope,sans-serif;white-space:normal;color:#c9ea92;border:1px solid #6a803f;padding:5px 7px;text-align:center}
+.dc-dossier-body{display:grid;grid-template-columns:85px 1fr;gap:13px;margin-bottom:16px;align-items:start}
+.dc-dossier-portrait{width:85px;height:115px;display:grid;place-items:center;background:radial-gradient(circle,#2a4c1e,#121a11);border:1px solid #48593b;overflow:hidden}
+.dc-dossier-portrait img{height:100%;width:100%;object-fit:cover;object-position:center 18%}
+.dc-dossier-portrait.portrait-missing::after{content:'ПОРТРЕТ';font:700 9px Manrope,sans-serif;color:#adc991}
+.dc-dossier-portrait span{font:700 22px Rajdhani,sans-serif;color:var(--lime)}
+.dc-dossier-copy p,.dc-dossier-lore{font-size:12px;line-height:1.65;margin:0 0 10px;color:#c7d4bd}
+.dc-dossier-lore{max-height:135px;overflow:auto;color:#9eaf97}
+.dc-dossier-abilities-head{border-top:1px solid #48593b;padding-top:13px;margin-bottom:12px;display:flex;align-items:start;justify-content:space-between;gap:10px}
+.dc-dossier-abilities-head span{font-weight:800;font-size:11px}
+.dc-hero-data-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;text-align:right}
+.dc-hero-data-actions small{font-size:10px;color:#aaba9b}
+.dc-hero-actions{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
+.dc-action{border:1px solid #6b854c;background:#24351b;color:#d9f7aa;padding:9px 10px;font:800 10px Manrope,sans-serif;line-height:1.4;text-align:center;cursor:pointer;min-width:0;flex:1}
+.dc-action-secondary{background:#161d15;border-color:#404c38;color:#bbc9b3}
+.dc-action:hover{border-color:var(--lime);color:var(--lime)}
+.dc-action:disabled{opacity:.5;cursor:default}
+.dc-abilities-list{display:grid;gap:9px}
+.dc-ability-card{display:grid;grid-template-columns:44px 1fr;gap:10px;background:#141b12;border:1px solid #36462f;padding:10px}
+.dc-ability-icon{width:44px;height:44px;display:grid;place-items:center;background:#22341c;border:1px solid #516842}
+.dc-ability-icon img{width:100%;height:100%;object-fit:contain}
+.dc-ability-icon span{font:800 17px Rajdhani,sans-serif;color:var(--lime)}
+.dc-ability-name{display:flex;justify-content:space-between;gap:10px;margin-bottom:5px;color:#f1f4e8}
+.dc-ability-name b{font-size:12px}.dc-ability-name span{font:800 9px Manrope,sans-serif;color:#91a584}
+.dc-ability-desc,.dc-abilities-empty{font-size:11px;line-height:1.65;color:#bac6b2;overflow-wrap:anywhere}
+.dc-abilities-empty{border:1px dashed #43533d;padding:12px}
+.dc-patron-names{display:flex;justify-content:space-between;gap:10px;border-top:1px solid #43503a;padding-top:12px;margin-top:12px;color:#899d7b;font:700 9px Manrope,sans-serif;letter-spacing:1px}
+.dc-dossier-retry{display:none!important}
+
+/* Team colors/logos/Steam profiles (preserve previous feature set). */
+.dc-steam-consent{display:flex;gap:10px;align-items:flex-start;margin:22px 0;padding:12px;border:1px solid #526443;background:#1a2516;color:#c6d2bf;font-size:11px;line-height:1.65}
+.dc-steam-consent input{width:17px;height:17px;flex:none;margin-top:3px;accent-color:var(--lime)}
+.dc-steam-avatar,.dc-team-avatar{width:32px;height:32px;object-fit:cover;border:1px solid #4a6138;flex:none;border-radius:3px}
+.dc-team-logo{width:50px;height:50px;object-fit:cover;border:1px solid var(--team-accent,#b6ff00);flex:none}
+.dc-logo-placeholder{display:grid;place-items:center;color:var(--team-accent,#b6ff00);font:700 28px Rajdhani,sans-serif}
+.t-team-card,.t-admin-team{border-top:3px solid var(--team-accent,#b6ff00)!important;background:linear-gradient(135deg,color-mix(in srgb,var(--team-accent,#b6ff00) 9%,#151914),#121711)}
+.t-team-card .t-team-number,.t-team-card .t-team-mark,.t-admin-team .t-drag-handle{color:var(--team-accent,#b6ff00)}
+.t-match-card.finished{border-left-color:var(--team-accent,#b6ff00)}
+.dc-match-logo{width:24px;height:24px;object-fit:cover}
+.dc-team-editor{margin:12px 0 25px;padding:22px;border-color:#637946}
+.dc-team-editor-title,.dc-team-editor-form{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:13px}
+.dc-team-editor-form .field{flex:1;min-width:160px}
+.dc-team-editor-form input[type=color]{height:45px;padding:4px}
+.dc-team-editor-form input[type=file]{min-height:45px;font-size:11px}
+.dc-steam-sync{border-color:#668047;color:var(--lime)}
+.dc-obs-team-logo{width:42px;height:42px;object-fit:cover;float:left;margin-right:8px}
+
+/* Bracket and admin spacing fixes */
+.t-public-teams,.t-admin-teams,.t-bracket-rounds,.admin-rows{margin-top:18px}
+.t-public-teams,.t-admin-teams{gap:20px}
+.t-team-card,.t-admin-team,.t-match-card{padding:clamp(15px,2vw,24px)}
+.t-bracket-toolbar,.t-admin-topbar{padding:20px;gap:13px}
+.t-match-card{line-height:1.55}
+#adminBracket,#bracketPublic{min-width:0;overflow-x:auto}
+.admin-toolbar{gap:14px;flex-wrap:wrap;margin-top:25px;margin-bottom:25px}
+.admin-toolbar h3{font-size:clamp(19px,2.5vw,28px)}
+.admin-metrics{gap:14px}
+.admin-metrics .metric{min-width:0}
+.t-placeholder{margin-top:18px;line-height:1.75;padding:20px 24px;color:#b9c6b2}
+.t-placeholder::before{content:'◆';position:absolute;right:22px;top:50%;color:#b6ff0018;transform:translateY(-50%);font:800 80px Rajdhani,sans-serif;pointer-events:none}
+.roster-grid{gap:12px}
+.roster-entry{padding:18px 20px}
+.roster-foot{margin-top:18px}
+.footer-inner{gap:20px;line-height:1.7}
+
+@media(max-width:950px){.header{flex-wrap:wrap;padding:12px 24px}.nav{width:100%;height:auto;order:3;justify-content:space-between;overflow:auto}.nav-btn{padding:12px 10px;height:auto}.header-label{display:none}.container{width:calc(100% - 36px)}.registration-layout{grid-template-columns:minmax(0,1fr) 280px}.heroes-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:800px){.registration-layout{grid-template-columns:1fr}.sidebar{display:grid;grid-template-columns:1fr 1fr;gap:15px}.info-quote{margin:0}.heroes-grid{grid-template-columns:repeat(5,minmax(0,1fr))}.dc-view-hero{min-height:170px}.admin-metrics{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:540px){.container{width:calc(100% - 24px)}.header{padding:10px 12px}.section-heading h2{font-size:32px}.dc-view-hero{padding:24px 18px;min-height:155px}.dc-view-hero::after{width:135px;height:135px}.dc-view-hero::before{font-size:100px}.heroes-grid{grid-template-columns:repeat(3,minmax(0,1fr));max-height:450px}.hero-card{min-height:129px}.hero-card img,.hero-card .image-fallback{height:100px}.sidebar{grid-template-columns:1fr}.dc-dossier-body{grid-template-columns:74px 1fr}.dc-dossier-portrait{width:74px;height:100px}.t-public-teams,.t-admin-teams{grid-template-columns:1fr}.section-heading p{font-size:12px}.form-panel,.roster-panel,.broadcast-panel,.obs-panel{padding:18px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}}

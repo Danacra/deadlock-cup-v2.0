@@ -1,0 +1,33 @@
+/* Пользовательский шрифт Valve Occult SemiBold. Поместите исходный
+   ValveOccult-SemiBold.ttf рядом с этим файлом в корень сайта. */
+@font-face {
+  font-family: 'Deadlock Occult';
+  src: url('./ValveOccult-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root{--lime:#B6FF00}*{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;padding:0;overflow:hidden;background:transparent!important;color:#f9fff0}body{font-family:'Deadlock Occult',Arial,sans-serif}.overlay-stage{width:100vw;height:100vh;position:relative;overflow:hidden}.overlay-demo{position:absolute;top:3%;right:3%;background:#b6ff00;color:#0a0a0a;padding:8px 20px;font-size:24px;font-weight:700;letter-spacing:3px}.scorebug{position:absolute;top:4%;left:50%;transform:translateX(-50%);width:min(980px,90vw);display:grid;grid-template-columns:minmax(0,1fr) 120px minmax(0,1fr);background:#0a0a0af2;border:2px solid var(--lime);box-shadow:0 15px 55px #000a;min-height:135px;animation:up .4s ease both}.scorebug:before{content:'';position:absolute;inset:0 0 auto;height:5px;background:var(--lime)}.score-name{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:22px 15px;min-width:0}.score-name span{width:100%;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:clamp(25px,3vw,41px);font-weight:700;text-transform:uppercase}.score-name small{font:700 15px 'Deadlock Occult';color:#95a083;letter-spacing:1px}.score-center{background:var(--lime);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#0a0a0a}.score-center strong{font-size:45px;font-weight:700;line-height:1}.score-center small{font:800 11px 'Deadlock Occult';letter-spacing:2px;text-align:center}.round{position:absolute;top:calc(4% + 135px);left:50%;transform:translateX(-50%);background:#0a0a0af2;color:var(--lime);font:700 22px 'Deadlock Occult';padding:8px 27px;letter-spacing:2px;white-space:nowrap}.roster-overlay{position:absolute;top:16%;left:8%;width:84%;border:2px solid var(--lime);background:#0a0a0aeF;padding:35px;box-shadow:0 20px 80px #0009;max-height:72%;overflow:hidden}.roster-header{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #596647;padding-bottom:15px;margin-bottom:21px}.roster-header strong{font-size:52px}.roster-header small{font-size:27px;color:var(--lime);letter-spacing:2px}.roster-overgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.roster-overgrid .item{background:#232720;border-left:4px solid var(--lime);padding:12px 15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;font-size:29px}.roster-overgrid .item small{font-size:15px;margin-right:12px;color:#a0ae85}.lowerthird{position:absolute;left:6%;right:6%;bottom:7%;height:96px;background:#0a0a0af3;border-left:8px solid var(--lime);border-bottom:2px solid #536a24;display:flex;align-items:center;justify-content:space-between;padding:10px 35px;box-shadow:0 12px 35px #000a;animation:fadeRise .4s ease both}.lowerthird .tag{font:700 22px 'Deadlock Occult';letter-spacing:3px;color:var(--lime)}.lowerthird .names{font:700 44px 'Deadlock Occult';overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.lowerthird .names b{color:var(--lime);margin:0 24px}.lowerthird .roundname{font:600 24px 'Deadlock Occult';color:#adbd96;white-space:nowrap}.offline-msg{position:absolute;top:10%;left:50%;transform:translateX(-50%);background:#10140ff0;color:#b6ff00;padding:20px;font:700 25px 'Deadlock Occult'}.hide{display:none!important}@keyframes up{from{opacity:0;transform:translate(-50%,15px)}to{opacity:1;transform:translate(-50%,0)}}@media(max-width:800px){.roster-overgrid{grid-template-columns:repeat(2,1fr)}.lowerthird .roundname{display:none}.scorebug{grid-template-columns:1fr 80px 1fr}}
+@keyframes fadeRise{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
+.team-scorebug .score-name span{font-family:'Deadlock Occult',Arial,sans-serif;font-weight:800;font-size:32px}
+.team-scorebug .score-center small{white-space:nowrap}
+
+/* v2.5: short broadcast animations. Overlay remains transparent. */
+@keyframes dc-obs-score {0%{opacity:.5;transform:scale(.92)}60%{opacity:1;transform:scale(1.07)}100%{opacity:1;transform:scale(1)}}
+@keyframes dc-obs-item {from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+@keyframes dc-obs-glint {from{transform:translateX(-115%)}to{transform:translateX(160%)}}
+.scorebug {isolation:isolate;overflow:hidden}
+.scorebug::after {content:'';position:absolute;inset:0;width:40%;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(182,255,0,.09),transparent);animation:dc-obs-glint .9s ease-out .2s both;z-index:2}
+.score-center strong {animation: dc-obs-score .42s ease-out both}
+.roster-overgrid .item {animation:dc-obs-item .36s ease-out both}
+.roster-overgrid .item:nth-child(4n+2){animation-delay:.04s}
+.roster-overgrid .item:nth-child(4n+3){animation-delay:.08s}
+.roster-overgrid .item:nth-child(4n+4){animation-delay:.12s}
+@media (prefers-reduced-motion:reduce) {
+  .scorebug, .score-center strong, .roster-overgrid .item, .lowerthird,
+  .scorebug::after {animation:none!important}
+}
+/* v2.6 OBS team identity: public team emblem and chosen accent. */
+.team-scorebug .score-name{border-top:4px solid var(--obs-accent,#b6ff00)}
+.dc-obs-team-logo{width:38px;height:38px;max-width:38px;object-fit:cover;border:1px solid var(--obs-accent,#b6ff00);border-radius:3px}
