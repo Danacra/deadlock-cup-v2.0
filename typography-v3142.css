@@ -1,0 +1,123 @@
+/* Deadlock Cup v3.14.2 — Readable Typography
+   A small size increase for copy, form inputs and admin metadata.
+   Preserve Valve Occult for display headings; Manrope for ordinary text.
+   Loaded AFTER theme-v314.css so the site's branding remains unchanged. */
+
+/* Regular text: gently larger on desktop and mobile. */
+body { font-size: 14.5px; line-height: 1.65; }
+
+/* Registration and team registration: labels, inputs and helper copy. */
+.field > span,
+.team-profile-card .field > span,
+.team-apply-form .field > span {
+  font-size: 13px;
+  line-height: 1.55;
+  font-weight: 700;
+}
+.field > span small,
+.team-profile-card .field > span small { font-size: 12px; }
+.field input,
+.field select,
+.field textarea,
+.roster-search,
+.filters input,
+.filters select,
+.hero-filter input,
+.team-profile-card input,
+.team-profile-card select,
+.team-profile-card textarea {
+  font-family: var(--to-body-font) !important;
+  font-size: 14px;
+  line-height: 1.55;
+}
+.field input::placeholder,
+.field textarea::placeholder,
+.roster-search::placeholder,
+.hero-filter input::placeholder { opacity: 1; color: #8c9688; }
+.panel-heading p,
+.team-profile-help,
+.team-request-consent,
+.dc-steam-consent,
+.privacy-note,
+.team-applications-heading p,
+.roster-foot,
+.info-panel p,
+.section-heading p,
+.hero-left > p,
+.dc-team-profile-note,
+.message,
+.empty-mini { font-size: 13.5px; line-height: 1.7; }
+
+/* Small navigational and status captions, without enlarging large headings. */
+.nav-btn,
+.mini-btn,
+.action-btn,
+.btn,
+.reg-mode-btn { font-size: 12.5px; }
+.text-muted,
+.roster-foot .text-muted,
+.player-details div span,
+.team-profile-card-heading span { font-size: 11.5px; }
+.player-details { font-size: 14px; line-height: 1.6; }
+.player-details div span { font-family: var(--to-body-font) !important; font-weight: 800; }
+.state,
+#view-admin .dc-team-profile-badge { font-family: var(--to-body-font) !important; font-size: 11.5px; }
+
+/* Public team cards — larger, bolder team member names. */
+.t-team-card .t-team-player {
+  gap: 10px;
+  flex-wrap: wrap;
+  min-height: 46px;
+  padding: 11px 12px;
+}
+.t-team-card .t-team-player > b {
+  flex: 1 1 115px;
+  min-width: 0;
+  font-family: var(--to-body-font) !important;
+  font-size: 15.5px;
+  font-weight: 800 !important;
+  line-height: 1.4;
+  letter-spacing: 0;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+.t-team-card .t-team-player > span:first-child { font-size: 13px; font-weight: 800; }
+.t-team-card .t-team-player .team-captain-tag {
+  margin-left: auto;
+  font-family: var(--to-body-font) !important;
+  font-size: 11px;
+}
+
+/* Organizer team editor — preserve two-line row layout from v3.10. */
+#view-admin .t-team-dropzone .t-roster-name,
+#view-admin .t-team-dropzone .t-player-pill > b,
+#view-admin .t-player-pool .t-player-pill > b {
+  font-family: var(--to-body-font) !important;
+  font-size: 15.5px;
+  font-weight: 800 !important;
+  line-height: 1.45;
+  overflow-wrap: break-word;
+  word-break: normal;
+  letter-spacing: 0;
+}
+#view-admin .t-team-dropzone .t-roster-name small { font-size: 11.5px; font-weight: 700; }
+#view-admin .t-team-dropzone .team-captain-tag { font-size: 11px; }
+#view-admin .t-team-dropzone .t-roster-actions .t-assignment-select,
+#view-admin .t-team-dropzone .t-roster-actions .t-guest-action {
+  font-family: var(--to-body-font) !important;
+  font-size: 12.5px;
+}
+
+/* Public participants and private registration cards. */
+.roster-entry .roster-name { font-family: var(--to-body-font) !important; font-size: 21px; font-weight: 800; line-height: 1.3; }
+.player-record-head strong { font-weight: 800; }
+#view-admin .player-record .record-actions button { font-size: 12.5px; }
+
+@media (max-width: 640px) {
+  body { font-size: 14px; }
+  .t-team-card .t-team-player > b,
+  #view-admin .t-team-dropzone .t-roster-name,
+  #view-admin .t-team-dropzone .t-player-pill > b { font-size: 15px; }
+  .player-details { font-size: 13.5px; }
+  .roster-entry .roster-name { font-size: 19px; }
+}
