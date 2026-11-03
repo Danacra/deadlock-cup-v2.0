@@ -28,7 +28,7 @@ body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;bac
 
 /* Stable atmospheric section banner — no 3D/WebGL dependencies. */
 .dc-view-hero{position:relative;isolation:isolate;border:1px solid #39452e;background:linear-gradient(110deg,#141b10 0%,#12170e 42%,#11170d 78%,#171c10);padding:34px clamp(20px,3vw,42px) 30px;margin-bottom:24px;min-height:204px;overflow:hidden}
-.dc-view-hero::before{content:'D//';position:absolute;right:9%;top:50%;transform:translateY(-50%);color:#b6ff0011;-webkit-text-stroke:1px #b6ff002a;font:800 clamp(100px,13vw,190px)/1 Rajdhani,Arial,sans-serif;pointer-events:none}
+.dc-view-hero::before{content:'';position:absolute;right:9%;top:50%;transform:translateY(-50%);color:#b6ff0011;-webkit-text-stroke:1px #b6ff002a;font:800 clamp(100px,13vw,190px)/1 Rajdhani,Arial,sans-serif;pointer-events:none}
 .dc-view-hero::after{content:'';position:absolute;width:260px;height:260px;right:12%;top:50%;border:2px solid #b6ff0032;border-radius:50%;transform:translateY(-50%);box-shadow:0 0 0 24px #b6ff000a,0 0 0 52px #b6ff0005;pointer-events:none;animation:dc-stable-spin 24s linear infinite}
 @keyframes dc-stable-spin{to{transform:translateY(-50%) rotate(360deg)}}
 .dc-view-hero .section-kicker,.dc-view-hero .section-heading{position:relative;z-index:1}

@@ -1,0 +1,241 @@
+/* Deadlock Cup v3.14 — TO / Orbital identity. Intentionally last in the CSS stack.
+   The community's black + lime color system is retained. */
+@font-face {
+  font-family: 'Manrope Cup';
+  src: url('./assets/Manrope.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+}
+:root {
+  --to-ink: #0a0a0a;
+  --to-neon: #b6ff00;
+  --to-cream: #efe7c9;
+  --to-body: #d2dacd;
+  --to-muted: #9ca995;
+  --to-orbit: rgba(182,255,0,.25);
+  --to-body-font: 'Manrope Cup', Manrope, 'Segoe UI', Arial, sans-serif;
+  --to-display-font: 'Valve Occult Local', 'Deadlock Occult', Rajdhani, Impact, sans-serif;
+}
+body, input, textarea, select, button, .nav-btn, .t-team-player, .t-team-player b,
+.roster-entry, .roster-grid, .hero-name, .hero-card, .hero-load-status,
+.field, .panel p, .t-placeholder, .t-admin-team, .t-admin-team .t-admin-player,
+.t-team-playerlist, .team-apply-form, .team-profile-list, .team-applications,
+.dc-team-editor, .admin-rows, .roster-foot, .filters, .mini-btn, .btn,
+.t-player-pool, .t-bracket-toolbar, .t-public-teams, .t-admin-teams,
+.team-request-consent, .privacy-note, .dc-steam-consent, .message,
+.info-panel p, .info-caption, .hero-left>p, .section-heading p, .section-kicker,
+.footer-inner>span, .brand-word small, .text-muted, .eyebrow, .hero-serial,
+.banner-bottom, .t-team-card small, .admin-list-panel p, .dc-egg-description,
+.dc-egg-progress, .dc-egg-footer {
+  font-family: var(--to-body-font) !important;
+}
+/* Large headings retain the original occult display typeface. */
+h1, h2, h3, .hero-left h1, .section-heading h2, .panel-heading h3,
+.admin-toolbar h3, .admin-list-header h3, .roster-head h3,
+.brand-word, .info-quote p, .info-big, .metric strong, .step,
+.t-team-heading h3, .t-team-number, .t-bracket-round-title b,
+.dc-egg-dialog h2 {
+  font-family: var(--to-display-font) !important;
+}
+body { font-size: 13px; line-height: 1.65; }
+.field input, .field select, .field textarea, .roster-search, .filters input,
+.filters select, .team-profile-heroes select { font-size: 13px; line-height: 1.55; }
+.roster-entry, .t-team-player, .t-admin-player, .t-reserve, .player-record,
+.team-profile-card { overflow-wrap: anywhere; }
+.t-team-player b, .player-record b, .roster-entry b { font-weight: 700; letter-spacing: 0; }
+.hero-left>p,.section-heading p { font-size: 13px; }
+.brand-word small { font-weight: 800; letter-spacing: 1.75px; }
+
+/* TO emblem — transparent cutout from the image supplied for this site. */
+.brand { gap: 12px; }
+.dc-brand-mark,
+.brand-mark.dc-brand-mark {
+  flex: 0 0 54px;
+  width: 54px;
+  height: 54px;
+  padding: 0;
+  background: none;
+  border: 1px solid rgba(220,205,154,.26);
+  border-radius: 50%;
+  box-shadow: inset 0 0 22px rgba(182,255,0,.045), 0 0 0 1px rgba(182,255,0,.04);
+  transform: none;
+  display: grid;
+  place-items: center;
+  line-height: 1;
+  overflow: visible;
+  position: relative;
+}
+.dc-brand-mark::before {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border: 1px dashed rgba(182,255,0,.24);
+  border-radius: 50%;
+  animation: dc-to-spin 32s linear infinite;
+  pointer-events: none;
+}
+.dc-brand-mark img { width: 48px; height: 49px; object-fit: contain; display: block;
+  filter: drop-shadow(0 0 6px rgba(232,215,152,.2));
+  transition: transform .45s ease, filter .45s ease;
+}
+.brand:hover .dc-brand-mark img { transform: scale(1.09); filter: drop-shadow(0 0 10px rgba(182,255,0,.25)); }
+.brand-word { font-size: clamp(21px,1.8vw,27px); }
+.header { box-shadow: 0 12px 35px rgba(0,0,0,.26); }
+.nav-btn { position: relative; transition: color .25s ease, background-color .25s ease; }
+.nav-btn:hover { background: rgba(182,255,0,.045); }
+.nav-btn.active { text-shadow: 0 0 14px rgba(182,255,0,.18); }
+
+/* Main hero — multi-layer ring choreography with softened color between paths. */
+.hero-banner {
+  background: radial-gradient(ellipse at 75% 44%,rgba(27,55,14,.31),transparent 55%),
+    radial-gradient(ellipse at 56% 97%,rgba(146,170,45,.06),transparent 64%),
+    linear-gradient(115deg,#101410,#090b09 65%,#080a08);
+}
+.hero-right { isolation: isolate; }
+.dc-orbit-system {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: min(100%,580px); height: min(100%,580px);
+  aspect-ratio: 1;
+  transform: translate(-50%,-50%);
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  filter: drop-shadow(0 0 36px rgba(182,255,0,.07));
+}
+.dc-orbit-wash {
+  position: absolute; inset: -3%; border-radius: 50%;
+  background:
+    radial-gradient(circle,rgba(182,255,0,.015) 0 18%,rgba(182,255,0,.055) 23%,transparent 30%,
+    rgba(199,167,83,.06) 34%,transparent 42%,rgba(182,255,0,.055) 47%,transparent 55%,
+    rgba(182,255,0,.025) 59%,transparent 70%),
+    conic-gradient(from 42deg,transparent 0deg,rgba(182,255,0,.025) 80deg,
+      transparent 128deg,rgba(239,213,138,.05) 216deg,transparent 290deg);
+  animation: dc-orbit-breathe 6.5s ease-in-out infinite alternate;
+}
+.hero-right .hero-monogram { display:none !important; }
+.dc-orbit-logo {
+  position:relative; z-index:4;
+  display:block;
+  width: clamp(185px,55%,312px);
+  max-height: 67%; object-fit:contain;
+  opacity: .26;
+  filter: saturate(.8) drop-shadow(0 0 28px rgba(182,255,0,.15));
+  animation: dc-logo-float 7s ease-in-out infinite;
+}
+.hero-right .hero-ring {
+  position:absolute; display:block; left:50%; top:50%;
+  margin:0; height:auto; border-radius:50%; aspect-ratio:1;
+  transform:translate(-50%,-50%);
+  box-shadow: inset 0 0 15px rgba(182,255,0,.035),0 0 18px rgba(182,255,0,.025);
+}
+.hero-right .ring-a { width: 53%; border:1px solid rgba(189,246,82,.24); animation:dc-orbit-turn-a 23s linear infinite; }
+.hero-right .ring-b { width:70%; border:1px dashed rgba(182,255,0,.26); animation:dc-orbit-turn-b 44s linear infinite; }
+.hero-right .ring-c { width:89%; border:1px solid rgba(182,255,0,.19); animation:dc-orbit-turn-a 64s linear infinite reverse; }
+.hero-right .ring-d { width:107%; border:1px dotted rgba(223,205,120,.18); animation:dc-orbit-turn-b 82s linear infinite reverse; }
+.hero-right .hero-ring::before,
+.hero-right .hero-ring::after {
+  content:''; position:absolute; display:block; width:6px; height:6px; border-radius:50%;
+  background:var(--to-neon); box-shadow:0 0 9px rgba(182,255,0,.9),0 0 24px rgba(182,255,0,.25);
+}
+.hero-right .hero-ring::before {left:50%;top:-3px;}
+.hero-right .hero-ring::after {right:15%;bottom:13%;width:3px;height:3px;opacity:.62;}
+.hero-right .ring-c::before { background: #eddfae; box-shadow:0 0 12px rgba(235,210,132,.65); }
+.dc-orbit-compass {
+  position:absolute;color:rgba(226,208,136,.28);font-size:25px;
+  text-shadow:0 0 16px rgba(182,255,0,.25);pointer-events:none;
+  animation:dc-orbit-breathe 4s ease-in-out infinite alternate;
+}
+.dc-orbit-compass-one{top:11%;right:14%;}.dc-orbit-compass-two{bottom:12%;left:15%;font-size:17px;animation-delay:-2s;}
+.hero-serial{z-index:5;bottom:21px;right:8px;letter-spacing:2px;color:#9aa983;}
+
+/* Every page header has the same brand language; old monogram removed. */
+.dc-view-hero { isolation:isolate; min-height:222px; }
+.dc-view-hero::before,
+.dc-view-hero::after { content:none!important;display:none!important; }
+.dc-view-hero .section-kicker,
+.dc-view-hero .section-heading{position:relative;z-index:3;max-width:min(760px,75%);}
+.dc-section-art {
+  position:absolute;right:clamp(4px,6vw,90px);top:50%;
+  transform:translateY(-50%);
+  width: clamp(220px,26vw,320px);aspect-ratio:1;
+  pointer-events:none;isolation:isolate;opacity:.94;
+}
+.dc-section-halo {position:absolute;inset:-8%;border-radius:50%;background:
+  radial-gradient(circle,rgba(182,255,0,.025) 0 24%,rgba(182,255,0,.085) 32%,transparent 40%,
+    rgba(210,189,120,.055) 48%,transparent 59%,rgba(182,255,0,.035) 65%,transparent 75%);
+  animation:dc-orbit-breathe 6s ease-in-out infinite alternate;
+}
+.dc-mini-ring {position:absolute;display:block;left:50%;top:50%;aspect-ratio:1;border-radius:50%;}
+.dc-mini-ring::before{content:'';position:absolute;left:50%;top:-3px;width:5px;height:5px;border-radius:50%;background:#b6ff00;box-shadow:0 0 12px #b6ff0088;}
+.dc-mini-ring.mini-a{width:57%;border:1px solid rgba(182,255,0,.22);animation:dc-orbit-turn-a 23s linear infinite}
+.dc-mini-ring.mini-b{width:83%;border:1px dashed rgba(182,255,0,.22);animation:dc-orbit-turn-b 45s linear infinite reverse}
+.dc-mini-ring.mini-c{width:108%;border:1px solid rgba(231,209,133,.15);animation:dc-orbit-turn-a 70s linear infinite}
+.dc-section-art>img{position:absolute;display:block;width:50%;height:63%;left:50%;top:50%;transform:translate(-50%,-50%);object-fit:contain;opacity:.24;filter:drop-shadow(0 0 17px rgba(182,255,0,.13));animation:dc-section-logo 7s ease-in-out infinite;}
+
+/* Repeated emblems also appear in the public team cards. */
+.t-team-mark{display:flex!important;align-items:center;justify-content:center;min-width:46px;overflow:visible!important;}
+.t-team-mark img{display:block;width:48px;height:50px;object-fit:contain;opacity:.63;filter:drop-shadow(0 0 11px rgba(182,255,0,.1));transition:opacity .3s,transform .3s;}
+.t-team-card:hover .t-team-mark img{opacity:.92;transform:scale(1.08);}
+.dc-footer-brand { display:flex;align-items:center;gap:10px; }
+.dc-footer-brand>img {display:block;width:43px;height:46px;object-fit:contain;opacity:.66;}
+
+/* More movement, without floating UI over forms or affecting functionality. */
+@keyframes dc-to-spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes dc-orbit-turn-a{from{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(360deg)}}
+@keyframes dc-orbit-turn-b{from{transform:translate(-50%,-50%) rotate(360deg)}to{transform:translate(-50%,-50%) rotate(0)}}
+@keyframes dc-orbit-breathe{0%{opacity:.44;filter:brightness(.84)}100%{opacity:1;filter:brightness(1.18)}}
+@keyframes dc-logo-float{0%,100%{transform:translateY(0) scale(1);opacity:.22}50%{transform:translateY(-7px) scale(1.026);opacity:.33}}
+@keyframes dc-section-logo{0%,100%{opacity:.19;filter:drop-shadow(0 0 15px rgba(182,255,0,.09))}50%{opacity:.30;filter:drop-shadow(0 0 22px rgba(182,255,0,.20))}}
+@keyframes dc-content-rise{0%{opacity:.5;transform:translateY(13px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes dc-sheen{0%{transform:translateX(-180%) rotate(12deg)}100%{transform:translateX(480%) rotate(12deg)}}
+@keyframes dc-shimmer{50%{box-shadow:0 0 22px rgba(182,255,0,.11),inset 0 0 16px rgba(182,255,0,.035)}}
+.hero-left h1 { animation:dc-content-rise .85s cubic-bezier(.18,.72,.19,1) both; }
+.hero-left .eyebrow,.hero-left>p,.hero-actions { animation:dc-content-rise .9s ease both;animation-delay:.1s; }
+.hero-actions{animation-delay:.18s;}
+.view:not([hidden]) > .dc-view-hero .section-heading,
+.view:not([hidden]) > .dc-view-hero .section-kicker{animation:dc-content-rise .7s ease both;}
+.dc-appear{animation:dc-content-rise .7s cubic-bezier(.18,.72,.19,1) both;}
+.btn-primary{position:relative;isolation:isolate;overflow:hidden;}
+.btn-primary::after {content:'';position:absolute;inset:-80% auto -80% -55%;width:22%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.38),transparent);transform:rotate(12deg);pointer-events:none;}
+.btn-primary:hover::after{animation:dc-sheen .8s ease-out both;}
+.panel,.t-team-card,.roster-entry,.t-match-card,.hero-card{transition:border-color .28s ease,box-shadow .28s ease,background-color .28s ease,transform .24s ease;}
+.t-team-card:hover,.roster-entry:hover,.hero-card:hover{transform:translateY(-3px);box-shadow:0 16px 36px #0008,0 0 0 1px rgba(182,255,0,.07);}
+.field input:focus,.field select:focus,.field textarea:focus{transition:border-color .2s ease,box-shadow .2s ease;}
+.footer{background:linear-gradient(95deg,#0b0f0b,#0c110d 60%,#0b0b0b)!important;}
+
+/* Stable layout on laptops, tablets and narrow phones. */
+@media (max-width:990px){
+  .hero-right .ring-d{width:98%}
+  .dc-view-hero .section-heading,.dc-view-hero .section-kicker{max-width:72%;}
+  .dc-section-art{right:2%;width:clamp(195px,28vw,280px);}
+}
+@media(max-width:830px){
+  .hero-right{position:absolute;inset:0 0 0 30%;opacity:.46;}
+  .dc-orbit-system{width:min(98%,450px);height:auto;}
+  .hero-left{z-index:4;}
+  .dc-section-art{width:230px;right:-25px;opacity:.47;}
+  .dc-view-hero .section-heading,.dc-view-hero .section-kicker{max-width:100%;}
+}
+@media(max-width:570px){
+  .dc-brand-mark,.brand-mark.dc-brand-mark{width:43px;height:43px;flex-basis:43px;}
+  .dc-brand-mark img{width:40px;height:40px;}
+  .brand-word{font-size:19px;}
+  .hero-left h1{position:relative;font-size:clamp(61px,15vw,80px);}
+  .hero-right{inset:0 0 0 21%;opacity:.27;}
+  .dc-orbit-system{width:340px;max-width:none;}
+  .dc-view-hero{min-height:180px;}
+  .dc-section-art{right:-44px;width:185px;opacity:.25;}
+  .dc-footer-brand img{width:35px;height:37px;}
+  .footer-inner{gap:15px;}
+}
+@media(prefers-reduced-motion:reduce){
+  .dc-brand-mark::before,.hero-right .hero-ring,.dc-orbit-wash,.dc-orbit-logo,
+  .dc-orbit-compass,.dc-section-halo,.dc-mini-ring,.dc-section-art>img,
+  .hero-left h1,.hero-left .eyebrow,.hero-left>p,.hero-actions,
+  .dc-appear,.view:not([hidden]) > .dc-view-hero .section-heading,
+  .view:not([hidden]) > .dc-view-hero .section-kicker{animation:none!important;}
+  .t-team-card,.roster-entry,.hero-card,.btn{transform:none!important;transition:none!important;}
+  .btn-primary::after{display:none;}
+}

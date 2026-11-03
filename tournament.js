@@ -74,7 +74,7 @@ export function createTournamentController({isAdmin, getRegistrations, onTeamsCh
     $('teamsPublicGrid').innerHTML = data.teams.length ? data.teams.map((team,i) => {
       const players = teamPlayers(team.id);
       return `<article class="t-team-card" style="--team-accent:${colorFor(team)}"><div class="t-team-heading"><span class="t-team-number">${String(i+1).padStart(2,'0')}</span>${logoMarkup(team)}
-        <div><h3>${esc(team.name)}</h3><small>${players.length} / 6 ИГРОКОВ</small></div><span class="t-team-mark">D//</span></div>
+        <div><h3>${esc(team.name)}</h3><small>${players.length} / 6 ИГРОКОВ</small></div><span class="t-team-mark" aria-hidden="true"><img src="./assets/to-emblem.png" alt="" loading="lazy"></span></div>
         <div class="t-team-playerlist">${players.length ? players.map((p,k)=>`<div class="t-team-player"><span>${String(k+1).padStart(2,'0')}</span>${avatarMarkup(p.avatar_url)}<b>${esc(p.nickname)}</b>${p.is_captain?'<span class="team-captain-tag">★ КАПИТАН</span>':''}</div>`).join('') : '<div class="t-team-empty">Состав пока не заполнен</div>'}</div></article>`;
     }).join('') : '<div class="t-placeholder">Команды ещё не сформированы. Как только организатор создаст составы, они появятся здесь.</div>';
   }
